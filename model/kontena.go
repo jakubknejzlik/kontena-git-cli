@@ -9,22 +9,22 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
-// ComposeSecret ...
-type ComposeSecret struct {
+// KontenaSecret ...
+type KontenaSecret struct {
 	Secret string `yaml:"secret,omitempty"`
 	Name   string `yaml:"name,omitempty"`
 	Type   string `yaml:"type,omitempty"`
 }
 
-// ComposeDeploy ...
-type ComposeDeploy struct {
+// KontenaDeploy ...
+type KontenaDeploy struct {
 	Strategy string `yaml:"strategy,omitempty"`
 }
 
-// ComposeService ...
-type ComposeService struct {
+// KontenaService ...
+type KontenaService struct {
 	ContainerName string            `yaml:"container_name,omitempty"`
-	Instances     string            `yaml:"instances,omitempty"` // this is not in standard docker-compose.yml !!!
+	Instances     string            `yaml:"instances,omitempty"`
 	Image         string            `yaml:"image,omitempty"`
 	Command       string            `yaml:"command,omitempty"`
 	Entrypoint    string            `yaml:"entrypoint,omitempty"`
@@ -33,20 +33,20 @@ type ComposeService struct {
 	Environment   []string          `yaml:"environment,omitempty"`
 	Links         []string          `yaml:"links,omitempty"`
 	Ports         []string          `yaml:"ports,omitempty"`
-	Secrets       []ComposeSecret   `yaml:"secrets,omitempty"`
-	Deploy        ComposeDeploy     `yaml:"deploy,omitempty"`
+	Secrets       []KontenaSecret   `yaml:"secrets,omitempty"`
+	Deploy        KontenaDeploy     `yaml:"deploy,omitempty"`
 }
 
-// Compose ...
-type Compose struct {
-	Stack    string                    `yaml:"stack,omitempty"` // this is not in standard docker-compose.yml !!!
+// Kontena ...
+type Kontena struct {
+	Stack    string                    `yaml:"stack,omitempty"`
 	Version  string                    `yaml:"version,omitempty"`
-	Services map[string]ComposeService `yaml:"services,omitempty"`
+	Services map[string]KontenaService `yaml:"services,omitempty"`
 }
 
-// ComposeLoad ...
-func ComposeLoad(path string) (Compose, error) {
-	var dc Compose
+// KontenaLoad ...
+func KontenaLoad(path string) (Kontena, error) {
+	var dc Kontena
 	data, err := ioutil.ReadFile(path)
 
 	if err != nil {
@@ -57,9 +57,9 @@ func ComposeLoad(path string) (Compose, error) {
 }
 
 // ExportTemporary ...
-func (c *Compose) ExportTemporary() (string, error) {
+func (c *Kontena) ExportTemporary() (string, error) {
 	var path string
-	tmp, err := ioutil.TempFile(os.TempDir(), "compose")
+	tmp, err := ioutil.TempFile(os.TempDir(), "kontena")
 	if err != nil {
 		return path, err
 	}
@@ -71,7 +71,7 @@ func (c *Compose) ExportTemporary() (string, error) {
 		return path, marshalError
 	}
 
-	utils.LogSection("exported compose file", string(data))
+	utils.LogSection("exported kontena file", string(data))
 	if err := ioutil.WriteFile(path, data, 0644); err != nil {
 		return path, err
 	}

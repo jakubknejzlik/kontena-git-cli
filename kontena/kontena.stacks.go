@@ -8,15 +8,24 @@ import (
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
 
-// StackExists ...
-func (c *Client) StackExists(stack string) bool {
+// StackList ...
+func (c *Client) StackList() ([]string, error) {
+	var list []string
 	res, err := utils.Run("kontena stack ls | awk 'FNR>1{printf \"%s \",$2}'")
 
 	if err != nil {
-		return false
+		return list, err
 	}
 
-	stacks := utils.SplitString(string(res), " ")
+	return utils.SplitString(string(res), " "), nil
+}
+
+// StackExists ...
+func (c *Client) StackExists(stack string) bool {
+	stacks, err := c.StackList()
+	if err != nil {
+		return false
+	}
 
 	for _, _stack := range stacks {
 		if _stack == stack {
@@ -28,11 +37,11 @@ func (c *Client) StackExists(stack string) bool {
 }
 
 // StackInstallOrUpgrade ...
-func (c *Client) StackInstallOrUpgrade(name string, stack model.Compose) error {
-	if c.StackExists(name) {
-		return c.StackUpgrade(name, stack)
+func (c *Client) StackInstallOrUpgrade(stack model.Kontena) error {
+	if c.StackExists(stack.Stack) {
+		return c.StackUpgrade(stack)
 	}
-	return c.StackInstall(name, stack)
+	return c.StackInstall(stack)
 }
 
 // StackDeploy ...
@@ -41,21 +50,22 @@ func (c *Client) StackDeploy(name string) error {
 }
 
 // StackInstall ...
-func (c *Client) StackInstall(name string, stack model.Compose) error {
-	return c.stackAction("install", name, stack)
+func (c *Client) StackInstall(stack model.Kontena) error {
+	return c.stackAction("install", stack.Stack, stack)
 }
 
 // StackUpgrade ...
-func (c *Client) StackUpgrade(name string, stack model.Compose) error {
-	return c.stackAction("upgrade", name, stack)
+func (c *Client) StackUpgrade(stack model.Kontena) error {
+	return c.stackAction("upgrade", stack.Stack, stack)
 }
 
-func (c *Client) stackAction(action, name string, stack model.Compose) error {
-	ds, err := getProcessedCompose(name, stack)
-	if err != nil {
-		return err
-	}
-	dsPath, err := ds.ExportTemporary()
+// StackRemove ...
+func (c *Client) StackRemove(name string) error {
+	return utils.RunInteractive(fmt.Sprintf("kontena stack remove --force %s", name))
+}
+
+func (c *Client) stackAction(action, name string, stack model.Kontena) error {
+	dsPath, err := stack.ExportTemporary()
 	if err != nil {
 		return err
 	}
@@ -67,22 +77,4 @@ func (c *Client) stackAction(action, name string, stack model.Compose) error {
 		cmd = fmt.Sprintf("kontena stack install --name %s %s", name, dsPath)
 	}
 	return utils.RunInteractive(cmd)
-}
-
-func getProcessedCompose(name string, s model.Compose) (model.Compose, error) {
-	// remap secrets to stack scope (by adding {stack}_)
-	for i, service := range s.Services {
-		newSecrets := []model.ComposeSecret{}
-		for _, secret := range service.Secrets {
-			newSecrets = append(newSecrets, model.ComposeSecret{
-				Secret: name + "_" + secret.Secret,
-				Name:   secret.Name,
-				Type:   secret.Type,
-			})
-		}
-		service.Secrets = newSecrets
-		s.Services[i] = service
-	}
-
-	return s, nil
 }

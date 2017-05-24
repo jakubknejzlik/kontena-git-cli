@@ -9,7 +9,7 @@ import (
 // Registry ...
 type Registry struct {
 	Name     string `yaml:"name,omitempty"`
-	User     string `yaml:"user,omitempty"`
+	User     string `yaml:"username,omitempty"`
 	Email    string `yaml:"email,omitempty"`
 	Password string `yaml:"password,omitempty"`
 }

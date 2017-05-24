@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"os"
 	"os/exec"
 
@@ -15,7 +16,9 @@ func Run(cmd string) ([]byte, error) {
 
 // RunInteractive ...
 func RunInteractive(cmd string) error {
-	// log.Println(cmd)
+	if os.Getenv("DEBUG") != "" {
+		log.Println(cmd)
+	}
 	command := exec.Command("sh", "-c", cmd)
 	command.Stdout = os.Stdout
 	command.Stdin = os.Stdin

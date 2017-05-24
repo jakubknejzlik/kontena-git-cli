@@ -3,11 +3,13 @@ package kontena
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
+	"github.com/urfave/cli"
 )
 
 // SecretsImport ...
@@ -15,8 +17,8 @@ func (c *Client) SecretsImport(stack, path string) error {
 	var secrets map[string]string
 
 	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
+	if err != nil && !os.IsNotExist(err) {
+		return cli.NewExitError(err, 1)
 	}
 
 	yaml.Unmarshal(data, &secrets)
