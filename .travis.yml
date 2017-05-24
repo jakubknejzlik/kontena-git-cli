@@ -9,6 +9,7 @@ script:
 
 after_success:
   - gox -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}"
+  - ls dist/
 
 deploy:
   provider: releases
