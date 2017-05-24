@@ -8,8 +8,7 @@ script:
    - ls
 
 after_success:
-  - gox -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}"
-  - ls dist/
+  - if  [ "${TRAVIS_TAG}" != "" ] && [ "${TRAVIS_GO_VERSION}" == "1.7" ];gox -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";fi
 
 deploy:
   provider: releases
@@ -19,4 +18,4 @@ deploy:
   file: "dist/*"
   skip_cleanup: true
   on:
-    repo: jakubknejzlik/kontena-git-cli
+    tags: true
