@@ -2,7 +2,6 @@ package kontena
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
@@ -39,7 +38,7 @@ func (c *Client) EnsureMasterLogin() error {
 	currentMasterURL := c.CurrentMaster().url
 
 	if masterURL != "" && currentMasterURL != masterURL || currentMasterURL == "" {
-		log.Println(currentMasterURL)
+		masterURL = utils.GetenvStrict("KONTENA_MASTER_URL")
 		token := utils.GetenvStrict("KONTENA_TOKEN")
 		fmt.Println("logging to master", masterURL)
 		return c.MasterLogin(masterURL, token)
