@@ -9,7 +9,8 @@ install:
   - go get -d -v ./...
 
 script:
-   - go build -v ./...
+   - go build
+   - ls
 
 deploy:
   provider: releases
