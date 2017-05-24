@@ -19,7 +19,7 @@ func GridCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:   "grid",
-				EnvVar: "CI_GRID",
+				EnvVar: "GRID",
 				Usage:  "grid used for installing",
 			},
 		},
