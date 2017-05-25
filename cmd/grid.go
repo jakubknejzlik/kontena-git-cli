@@ -170,11 +170,17 @@ func installStacksCommand() cli.Command {
 				}
 				if !client.StackExists(stackName) {
 					utils.Log("installing stack", stackName)
-					dc := defaultStack(stackName)
+					dc := getDefaultStack(stackName)
 					if err := client.StackInstall(dc); err != nil {
 						return cli.NewExitError(err, 1)
 					}
 				} else {
+					if stack, err := getStack(stackName); err == nil {
+						utils.Log("upgrading stack", stackName)
+						if err := client.StackUpgrade(stack); err != nil {
+							return cli.NewExitError(err, 1)
+						}
+					}
 					utils.Log("deploying stack", stackName)
 					if err := client.StackDeploy(stackName); err != nil {
 						return cli.NewExitError(err, 1)
@@ -187,13 +193,18 @@ func installStacksCommand() cli.Command {
 	}
 }
 
-func defaultStack(name string) model.Kontena {
+func getStack(name string) (model.Kontena, error) {
+	var k model.Kontena
 	stackConfigPath := fmt.Sprintf("./stacks/%s/kontena.yml", name)
-	if _, err := os.Stat(stackConfigPath); err == nil {
-		stack, err := model.KontenaLoad(stackConfigPath)
-		if err == nil {
-			return stack
-		}
+	if _, err := os.Stat(stackConfigPath); err != nil {
+		return k, err
+	}
+	return model.KontenaLoad(stackConfigPath)
+}
+
+func getDefaultStack(name string) model.Kontena {
+	if stack, err := getStack(name); err == nil {
+		return stack
 	}
 	return model.Kontena{
 		Stack:   name,
