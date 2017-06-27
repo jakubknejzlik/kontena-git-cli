@@ -24,7 +24,7 @@ type KontenaDeploy struct {
 // KontenaService ...
 type KontenaService struct {
 	ContainerName string            `yaml:"container_name,omitempty"`
-	Instances     string            `yaml:"instances,omitempty"`
+	Instances     int               `yaml:"instances,omitempty"`
 	Image         string            `yaml:"image,omitempty"`
 	Command       string            `yaml:"command,omitempty"`
 	Entrypoint    string            `yaml:"entrypoint,omitempty"`
