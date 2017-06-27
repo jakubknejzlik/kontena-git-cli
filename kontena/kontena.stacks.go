@@ -11,13 +11,13 @@ import (
 // StackList ...
 func (c *Client) StackList() ([]string, error) {
 	var list []string
-	res, err := utils.Run("kontena stack ls | awk 'FNR>1{printf \"%s \",$2}'")
+	res, err := utils.Run("kontena stack ls -q")
 
 	if err != nil {
 		return list, err
 	}
 
-	return utils.SplitString(string(res), " "), nil
+	return utils.SplitString(string(res), "\n"), nil
 }
 
 // StackExists ...
