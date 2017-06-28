@@ -124,6 +124,11 @@ func installCoreCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
+			utils.Log("deploying stack core")
+			if err := client.StackDeploy("core"); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
 			return nil
 		},
 	}
