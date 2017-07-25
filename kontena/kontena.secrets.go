@@ -21,6 +21,7 @@ func (c *Client) SecretsImport(stack, path string) error {
 		return cli.NewExitError(err, 1)
 	}
 
+	fmt.Println(string(data))
 	yaml.Unmarshal(data, &secrets)
 
 	oldSecrets, err := c.getSecrets()
@@ -51,8 +52,8 @@ func (c *Client) removeSecret(secret string) error {
 }
 
 func (c *Client) getSecrets() ([]string, error) {
-	data, err := utils.Run("kontena vault ls | awk 'FNR>1{printf \"%s \",$1}'")
-	return utils.SplitString(string(data), " "), err
+	data, err := utils.Run("kontena vault ls -q")
+	return utils.SplitString(string(data), "\n"), err
 }
 
 func (c *Client) getSecret(name string) (string, error) {
