@@ -222,7 +222,7 @@ func getDefaultStack(name string) model.KontenaStack {
 				},
 				Secrets: []model.KontenaSecret{
 					model.KontenaSecret{
-						Secret: name + "_VIRTUAL_HOSTS",
+						Secret: "VIRTUAL_HOSTS",
 						Name:   "KONTENA_LB_VIRTUAL_HOSTS",
 						Type:   "env",
 					},
