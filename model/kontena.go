@@ -3,7 +3,6 @@ package model
 import (
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
@@ -75,7 +74,7 @@ func (c KontenaStack) ExportTemporary(translateSecrets bool) (string, error) {
 			for _, secret := range service.Secrets {
 				newSecrets = append(newSecrets, KontenaSecret{
 					Secret: stack.Name + "_" + secret.Secret,
-					Name:   strings.Replace(secret.Name, "INLOOP_LB", "KONTENA_LB", 1),
+					Name:   secret.Name,
 					Type:   secret.Type,
 				})
 			}
