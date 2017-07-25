@@ -3,6 +3,7 @@ package model
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
@@ -37,16 +38,16 @@ type KontenaService struct {
 	Deploy        KontenaDeploy     `yaml:"deploy,omitempty"`
 }
 
-// Kontena ...
-type Kontena struct {
-	Stack    string                    `yaml:"stack,omitempty"`
+// KontenaStack ...
+type KontenaStack struct {
+	Name     string                    `yaml:"stack,omitempty"`
 	Version  string                    `yaml:"version,omitempty"`
 	Services map[string]KontenaService `yaml:"services,omitempty"`
 }
 
 // KontenaLoad ...
-func KontenaLoad(path string) (Kontena, error) {
-	var dc Kontena
+func KontenaLoad(path string) (KontenaStack, error) {
+	var dc KontenaStack
 	data, err := ioutil.ReadFile(path)
 
 	if err != nil {
@@ -57,7 +58,7 @@ func KontenaLoad(path string) (Kontena, error) {
 }
 
 // ExportTemporary ...
-func (c *Kontena) ExportTemporary() (string, error) {
+func (c KontenaStack) ExportTemporary(translateSecrets bool) (string, error) {
 	var path string
 	tmp, err := ioutil.TempFile(os.TempDir(), "kontena")
 	if err != nil {
@@ -65,8 +66,26 @@ func (c *Kontena) ExportTemporary() (string, error) {
 	}
 
 	path = tmp.Name()
+	stack := c
 
-	data, marshalError := yaml2.Marshal(c)
+	if translateSecrets {
+		newServices := map[string]KontenaService{}
+		for i, service := range stack.Services {
+			newSecrets := []KontenaSecret{}
+			for _, secret := range service.Secrets {
+				newSecrets = append(newSecrets, KontenaSecret{
+					Secret: stack.Name + "_" + secret.Secret,
+					Name:   strings.Replace(secret.Name, "INLOOP_LB", "KONTENA_LB", 1),
+					Type:   secret.Type,
+				})
+			}
+			service.Secrets = newSecrets
+			newServices[i] = service
+		}
+		stack.Services = newServices
+	}
+
+	data, marshalError := yaml2.Marshal(stack)
 	if marshalError != nil {
 		return path, marshalError
 	}

@@ -37,8 +37,8 @@ func (c *Client) StackExists(stack string) bool {
 }
 
 // StackInstallOrUpgrade ...
-func (c *Client) StackInstallOrUpgrade(stack model.Kontena) error {
-	if c.StackExists(stack.Stack) {
+func (c *Client) StackInstallOrUpgrade(stack model.KontenaStack) error {
+	if c.StackExists(stack.Name) {
 		return c.StackUpgrade(stack)
 	}
 	return c.StackInstall(stack)
@@ -50,13 +50,13 @@ func (c *Client) StackDeploy(name string) error {
 }
 
 // StackInstall ...
-func (c *Client) StackInstall(stack model.Kontena) error {
-	return c.stackAction("install", stack.Stack, stack)
+func (c *Client) StackInstall(stack model.KontenaStack) error {
+	return c.stackAction("install", stack.Name, stack)
 }
 
 // StackUpgrade ...
-func (c *Client) StackUpgrade(stack model.Kontena) error {
-	return c.stackAction("upgrade", stack.Stack, stack)
+func (c *Client) StackUpgrade(stack model.KontenaStack) error {
+	return c.stackAction("upgrade", stack.Name, stack)
 }
 
 // StackRemove ...
@@ -64,8 +64,8 @@ func (c *Client) StackRemove(name string) error {
 	return utils.RunInteractive(fmt.Sprintf("kontena stack remove --force %s", name))
 }
 
-func (c *Client) stackAction(action, name string, stack model.Kontena) error {
-	dsPath, err := stack.ExportTemporary()
+func (c *Client) stackAction(action, name string, stack model.KontenaStack) error {
+	dsPath, err := stack.ExportTemporary(true)
 	if err != nil {
 		return err
 	}

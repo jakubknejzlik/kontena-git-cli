@@ -26,12 +26,12 @@ func GridCommand() cli.Command {
 			},
 		},
 		Subcommands: []cli.Command{
-			installCommand(),
+			gridInstallCommand(),
 		},
 	}
 }
 
-func installCommand() cli.Command {
+func gridInstallCommand() cli.Command {
 	return cli.Command{
 		Name: "install",
 		Action: func(c *cli.Context) error {
@@ -180,7 +180,7 @@ func installStacksCommand() cli.Command {
 						return cli.NewExitError(err, 1)
 					}
 				} else {
-					if stack, err := getStack(stackName); err == nil {
+					if stack, err := getStackFromGrid(stackName); err == nil {
 						utils.Log("upgrading stack", stackName)
 						if err := client.StackUpgrade(stack); err != nil {
 							return cli.NewExitError(err, 1)
@@ -198,8 +198,8 @@ func installStacksCommand() cli.Command {
 	}
 }
 
-func getStack(name string) (model.Kontena, error) {
-	var k model.Kontena
+func getStackFromGrid(name string) (model.KontenaStack, error) {
+	var k model.KontenaStack
 	stackConfigPath := fmt.Sprintf("./stacks/%s/kontena.yml", name)
 	if _, err := os.Stat(stackConfigPath); err != nil {
 		return k, err
@@ -207,12 +207,12 @@ func getStack(name string) (model.Kontena, error) {
 	return model.KontenaLoad(stackConfigPath)
 }
 
-func getDefaultStack(name string) model.Kontena {
-	if stack, err := getStack(name); err == nil {
+func getDefaultStack(name string) model.KontenaStack {
+	if stack, err := getStackFromGrid(name); err == nil {
 		return stack
 	}
-	return model.Kontena{
-		Stack:   name,
+	return model.KontenaStack{
+		Name:    name,
 		Version: "0.0.1",
 		Services: map[string]model.KontenaService{
 			"web": model.KontenaService{
