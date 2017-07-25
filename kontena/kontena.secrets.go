@@ -21,7 +21,6 @@ func (c *Client) SecretsImport(stack, path string) error {
 		return cli.NewExitError(err, 1)
 	}
 
-	fmt.Println(string(data))
 	yaml.Unmarshal(data, &secrets)
 
 	oldSecrets, err := c.getSecrets()
