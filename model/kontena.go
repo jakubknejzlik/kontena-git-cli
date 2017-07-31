@@ -2,7 +2,6 @@ package model
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
@@ -68,7 +67,6 @@ func (c KontenaStack) ExportTemporary(translateSecrets bool) (string, error) {
 	path = tmp.Name()
 	stack := c
 
-	log.Println(stack)
 	if translateSecrets {
 		newServices := map[string]KontenaService{}
 		for i, service := range stack.Services {

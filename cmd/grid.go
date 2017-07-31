@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"time"
 
@@ -170,7 +169,6 @@ func installStacksCommand() cli.Command {
 			for _, stack := range stacks {
 				stackName := stack.Name()
 				if err := client.SecretsImport(stackName, fmt.Sprintf("./stacks/%s/secrets.yml", stackName)); err != nil {
-					log.Println(err)
 					return err
 				}
 				if !client.StackExists(stackName) {
