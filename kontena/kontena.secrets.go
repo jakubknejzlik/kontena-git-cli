@@ -23,7 +23,7 @@ func (c *Client) SecretsImport(stack, path string) error {
 
 	yaml.Unmarshal(data, &secrets)
 
-	oldSecrets, err := c.getSecrets()
+	oldSecrets, err := c.GetSecrets()
 	if err != nil {
 		return err
 	}
@@ -37,8 +37,7 @@ func (c *Client) SecretsImport(stack, path string) error {
 	for key, value := range secrets {
 		secretKey := fmt.Sprintf("%s_%s", stack, key)
 		utils.Log("adding secret", stack+":"+key)
-		cmd := fmt.Sprintf("kontena vault write %s %s", secretKey, value)
-		if err := utils.RunInteractive(cmd); err != nil {
+		if err := c.WriteSecret(secretKey, value); err != nil {
 			return err
 		}
 	}
@@ -48,20 +47,32 @@ func (c *Client) SecretsImport(stack, path string) error {
 
 // HasSecret ...
 func (c *Client) HasSecret(name, stack string) bool {
-	value, _ := c.getSecret(stack + "_" + name)
+	value, _ := c.GetSecretValue(stack + "_" + name)
 	return value != ""
+}
+
+// WriteSecret ...
+func (c *Client) WriteSecret(secret, value string) error {
+	cmd := fmt.Sprintf("kontena vault update -u %s", secret)
+	_, err := utils.RunWithInput(cmd, []byte(value))
+	return err
 }
 
 func (c *Client) removeSecret(secret string) error {
 	return utils.RunInteractive(fmt.Sprintf("kontena vault rm --force %s", secret))
 }
 
-func (c *Client) getSecrets() ([]string, error) {
+// GetSecrets ...
+func (c *Client) GetSecrets() ([]string, error) {
 	data, err := utils.Run("kontena vault ls -q")
-	return utils.SplitString(string(data), "\n"), err
+	if err != nil {
+		return []string{}, err
+	}
+	return utils.SplitString(string(data), "\n"), nil
 }
 
-func (c *Client) getSecret(name string) (string, error) {
+// GetSecretValue ...
+func (c *Client) GetSecretValue(name string) (string, error) {
 	value, err := utils.Run(fmt.Sprintf("kontena vault read --value %s", name))
 	return string(value), err
 }
