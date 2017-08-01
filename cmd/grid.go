@@ -173,7 +173,7 @@ func installStacksCommand() cli.Command {
 				}
 				if !client.StackExists(stackName) {
 					utils.Log("installing stack", stackName)
-					dc := getDefaultStack(stackName)
+					dc := getDefaultStack(stackName, client.HasSecret("VIRTUAL_HOSTS", stackName))
 					if err := client.StackInstall(dc); err != nil {
 						return cli.NewExitError(err, 1)
 					}
@@ -205,26 +205,28 @@ func getStackFromGrid(name string) (model.KontenaStack, error) {
 	return model.KontenaLoad(stackConfigPath)
 }
 
-func getDefaultStack(name string) model.KontenaStack {
-	if stack, err := getStackFromGrid(name); err == nil {
-		return stack
+func getDefaultStack(name string, hasHost bool) model.KontenaStack {
+	secrets := []model.KontenaSecret{}
+	links := []string{}
+
+	if hasHost {
+		hostSecret := model.KontenaSecret{
+			Secret: "VIRTUAL_HOSTS",
+			Name:   "KONTENA_LB_VIRTUAL_HOSTS",
+			Type:   "env",
+		}
+		secrets = append(secrets, hostSecret)
+		links = append(links, "core/internet_lb")
 	}
+
 	return model.KontenaStack{
 		Name:    name,
 		Version: "0.0.1",
 		Services: map[string]model.KontenaService{
 			"web": model.KontenaService{
-				Image: "ksdn117/test-page",
-				Links: []string{
-					"core/internet_lb",
-				},
-				Secrets: []model.KontenaSecret{
-					model.KontenaSecret{
-						Secret: "VIRTUAL_HOSTS",
-						Name:   "KONTENA_LB_VIRTUAL_HOSTS",
-						Type:   "env",
-					},
-				},
+				Image:   "ksdn117/test-page",
+				Links:   links,
+				Secrets: secrets,
 			},
 		},
 	}

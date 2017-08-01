@@ -46,6 +46,12 @@ func (c *Client) SecretsImport(stack, path string) error {
 	return nil
 }
 
+// HasSecret ...
+func (c *Client) HasSecret(name, stack string) bool {
+	value, _ := c.getSecret(stack + "_" + name)
+	return value != ""
+}
+
 func (c *Client) removeSecret(secret string) error {
 	return utils.RunInteractive(fmt.Sprintf("kontena vault rm --force %s", secret))
 }
