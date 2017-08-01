@@ -47,6 +47,10 @@ func gridInstallCommand() cli.Command {
 				}
 			}
 
+			if err := installCertificatesCommand().Run(c); err != nil {
+				return err
+			}
+
 			if err := installCoreCommand().Run(c); err != nil {
 				return err
 			}
@@ -70,91 +74,7 @@ func gridInstallCommand() cli.Command {
 			installRegistriesCommand(),
 			pruneStacksCommand(),
 			installStacksCommand(),
-		},
-	}
-}
-
-func installRegistriesCommand() cli.Command {
-	return cli.Command{
-		Name: "registries",
-		Action: func(c *cli.Context) error {
-			client := kontena.Client{}
-
-			currentRegistries, err := client.CurrentRegistries()
-			if err != nil {
-				return cli.NewExitError(err, 1)
-			}
-			for _, regName := range currentRegistries {
-				if client.RegistryExists(regName) {
-					client.RegistryRemove(regName)
-				}
-			}
-
-			registries, err := model.RegistriesLoad("registries.yml")
-			if err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
-			for _, registry := range registries {
-				if !client.RegistryExists(registry.Name) {
-					if err := client.RegistryAdd(registry); err != nil {
-						return cli.NewExitError(err, 1)
-					}
-				}
-			}
-
-			return nil
-		},
-	}
-}
-
-func installCoreCommand() cli.Command {
-	return cli.Command{
-		Name: "core",
-		Action: func(c *cli.Context) error {
-			client := kontena.Client{}
-
-			dc, err := model.KontenaLoad("kontena.yml")
-			if err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
-			if err := client.StackInstallOrUpgrade(dc); err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
-			utils.Log("deploying stack core")
-			if err := client.StackDeploy("core"); err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
-			return nil
-		},
-	}
-}
-
-func pruneStacksCommand() cli.Command {
-	return cli.Command{
-		Name: "prune",
-		Action: func(c *cli.Context) error {
-			client := kontena.Client{}
-
-			stacks, err := client.StackList()
-			if err != nil {
-				return err
-			}
-
-			for _, stack := range stacks {
-				if stack == "core" {
-					continue
-				}
-				if _, err := os.Stat(fmt.Sprintf("./stacks/%s", stack)); os.IsNotExist(err) {
-					if err := client.StackRemove(stack); err != nil {
-						return err
-					}
-				}
-			}
-			return nil
+			installCertificatesCommand(),
 		},
 	}
 }

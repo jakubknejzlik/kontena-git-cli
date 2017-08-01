@@ -23,18 +23,18 @@ type KontenaDeploy struct {
 
 // KontenaService ...
 type KontenaService struct {
-	ContainerName string            `yaml:"container_name,omitempty"`
-	Instances     *int              `yaml:"instances,omitempty"`
-	Image         string            `yaml:"image,omitempty"`
-	Command       string            `yaml:"command,omitempty"`
-	Entrypoint    string            `yaml:"entrypoint,omitempty"`
-	Volumes       []string          `yaml:"volumes,omitempty"`
-	Labels        map[string]string `yaml:"labels,omitempty"`
-	Environment   []string          `yaml:"environment,omitempty"`
-	Links         []string          `yaml:"links,omitempty"`
-	Ports         []string          `yaml:"ports,omitempty"`
-	Secrets       []KontenaSecret   `yaml:"secrets,omitempty"`
-	Deploy        KontenaDeploy     `yaml:"deploy,omitempty"`
+	ContainerName string `yaml:"container_name,omitempty"`
+	Instances     *int   `yaml:"instances,omitempty"`
+	Image         string `yaml:"image,omitempty"`
+	Command       string `yaml:"command,omitempty"`
+	// Entrypoint    string            `yaml:"entrypoint,omitempty"`
+	Volumes     []string          `yaml:"volumes,omitempty"`
+	Labels      map[string]string `yaml:"labels,omitempty"`
+	Environment []string          `yaml:"environment,omitempty"`
+	Links       []string          `yaml:"links,omitempty"`
+	Ports       []string          `yaml:"ports,omitempty"`
+	Secrets     []KontenaSecret   `yaml:"secrets,omitempty"`
+	Deploy      KontenaDeploy     `yaml:"deploy,omitempty"`
 }
 
 // KontenaStack ...
