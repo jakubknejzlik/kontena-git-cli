@@ -11,7 +11,11 @@ import (
 // Run ...
 func Run(cmd string) ([]byte, error) {
 	command := exec.Command("sh", "-c", cmd)
-	return command.Output()
+	data, err := command.Output()
+	if err != nil {
+		return data, cli.NewExitError(err, 1)
+	}
+	return data, err
 }
 
 // RunInteractive ...
