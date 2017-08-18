@@ -9,6 +9,7 @@ func Log(m ...interface{}) {
 
 // LogSection ...
 func LogSection(title string, m ...interface{}) {
+	fmt.Println("\n================================")
 	fmt.Printf("==== %s ==== \n", title)
 	if len(m) > 0 {
 		fmt.Println("================================")
