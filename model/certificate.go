@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jakubknejzlik/kontena-git-cli/utils"
+
 	yaml2 "gopkg.in/yaml.v2"
 )
 
@@ -20,15 +22,19 @@ type Certificate struct {
 func CertificateLoadLocals() (map[string]Certificate, error) {
 	var certs map[string]Certificate
 
-	data, err := ioutil.ReadFile("certificates.yml")
-	if err != nil {
-		return certs, err
-	}
+	if utils.FileExists("certificates.yml") {
+		data, err := ioutil.ReadFile("certificates.yml")
+		if err != nil {
+			return certs, err
+		}
 
-	yaml2.Unmarshal(data, &certs)
-	for domain, cert := range certs {
-		cert.Domain = domain
-		certs[domain] = cert
+		yaml2.Unmarshal(data, &certs)
+		for domain, cert := range certs {
+			cert.Domain = domain
+			certs[domain] = cert
+		}
+	} else {
+		certs = map[string]Certificate{}
 	}
 
 	certsFiles, _ := ioutil.ReadDir("./certificates")
