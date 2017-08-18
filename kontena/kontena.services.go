@@ -11,7 +11,7 @@ import (
 // ServiceCreate ...
 func (c *Client) ServiceCreate(name string, service model.KontenaService) error {
 	cmd := []string{`kontena service create`}
-	if *service.Instances > 0 {
+	if service.Instances != nil && *service.Instances > 0 {
 		cmd = append(cmd, `--instances `+string(*service.Instances))
 	}
 	if service.Command != "" {
