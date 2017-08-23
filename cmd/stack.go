@@ -39,13 +39,13 @@ func stackInstallCommand() cli.Command {
 			client := kontena.Client{}
 
 			if err := client.EnsureMasterLogin(); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			grid := c.Parent().String("grid")
 			if client.CurrentGrid().Name == "" || grid != "" {
 				if err := client.GridUse(grid); err != nil {
-					return err
+					return cli.NewExitError(err, 1)
 				}
 			}
 
@@ -55,9 +55,13 @@ func stackInstallCommand() cli.Command {
 				return cli.NewExitError(stackErr.Error(), 1)
 			}
 
-			client.StackUpgrade(stack)
+			if err := client.StackUpgrade(stack); err != nil {
+				return cli.NewExitError(err, 1)
+			}
 
-			client.StackDeploy(stack.Name)
+			if err := client.StackDeploy(stack.Name); err != nil {
+				return cli.NewExitError(err, 1)
+			}
 
 			return nil
 		},

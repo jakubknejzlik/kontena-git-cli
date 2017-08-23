@@ -20,7 +20,7 @@ func pruneStacksCommand() cli.Command {
 
 			stacks, err := client.StackList()
 			if err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			for _, stack := range stacks {
@@ -29,7 +29,7 @@ func pruneStacksCommand() cli.Command {
 				}
 				if _, err := os.Stat(fmt.Sprintf("./stacks/%s", stack)); os.IsNotExist(err) {
 					if err := client.StackRemove(stack); err != nil {
-						return err
+						return cli.NewExitError(err, 1)
 					}
 				}
 			}

@@ -29,7 +29,7 @@ func installCoreCommand() cli.Command {
 			loadBalancer := dc.Services["internet_lb"]
 			currentCertificates, certsErr := client.CurrentCertificateSecrets()
 			if certsErr != nil {
-				return certsErr
+				return cli.NewExitError(certsErr, 1)
 			}
 
 			for _, secret := range currentCertificates {

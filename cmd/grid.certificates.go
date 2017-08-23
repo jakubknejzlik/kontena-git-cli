@@ -34,7 +34,7 @@ func installCertificatesCommand() cli.Command {
 			for _, certificate := range certificates {
 				if currentCertificateSecretsMap[certificate.SecretName()] == false {
 					if err := client.CertificateInstall(certificate); err != nil {
-						return err
+						return cli.NewExitError(err, 1)
 					}
 				}
 			}

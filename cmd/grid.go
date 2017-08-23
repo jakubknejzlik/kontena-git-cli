@@ -37,34 +37,34 @@ func gridInstallCommand() cli.Command {
 			client := kontena.Client{}
 
 			if err := client.EnsureMasterLogin(); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			grid := c.Parent().String("grid")
 			if client.CurrentGrid().Name == "" || grid != "" {
 				if err := client.GridUse(grid); err != nil {
-					return err
+					return cli.NewExitError(err, 1)
 				}
 			}
 
 			if err := installCertificatesCommand().Run(c); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			if err := installCoreCommand().Run(c); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			if err := installRegistriesCommand().Run(c); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			if err := pruneStacksCommand().Run(c); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			if err := installStacksCommand().Run(c); err != nil {
-				return err
+				return cli.NewExitError(err, 1)
 			}
 
 			return nil
@@ -89,7 +89,7 @@ func installStacksCommand() cli.Command {
 			for _, stack := range stacks {
 				stackName := stack.Name()
 				if err := client.SecretsImport(stackName, fmt.Sprintf("./stacks/%s/secrets.yml", stackName)); err != nil {
-					return err
+					return cli.NewExitError(err, 1)
 				}
 				if !client.StackExists(stackName) {
 					utils.Log("installing stack", stackName)
