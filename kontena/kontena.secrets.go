@@ -28,7 +28,8 @@ func (c *Client) SecretsImport(stack, path string) error {
 		return err
 	}
 	for _, secret := range oldSecrets {
-		if strings.HasPrefix(secret, stack+"_") {
+		secretKey := strings.Replace(secret, stack+"_", "", 1)
+		if strings.HasPrefix(secret, stack+"_") && secrets[secretKey] == "" {
 			utils.Log("removing secret", strings.Replace(secret, stack+"_", stack+":", 1))
 			c.SecretRemove(secret)
 		}
@@ -36,9 +37,11 @@ func (c *Client) SecretsImport(stack, path string) error {
 
 	for key, value := range secrets {
 		secretKey := fmt.Sprintf("%s_%s", stack, key)
-		utils.Log("adding secret", stack+":"+key)
-		if err := c.SecretWrite(secretKey, value); err != nil {
-			return err
+		if !utils.ArrayOfStringsContains(oldSecrets, secretKey) {
+			utils.Log("adding secret", stack+":"+key)
+			if err := c.SecretWrite(secretKey, value); err != nil {
+				return err
+			}
 		}
 	}
 

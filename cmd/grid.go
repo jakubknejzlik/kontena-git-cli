@@ -17,13 +17,6 @@ import (
 func GridCommand() cli.Command {
 	return cli.Command{
 		Name: "grid",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:   "grid",
-				EnvVar: "GRID",
-				Usage:  "grid used for installing",
-			},
-		},
 		Subcommands: []cli.Command{
 			gridInstallCommand(),
 		},
@@ -32,19 +25,22 @@ func GridCommand() cli.Command {
 
 func gridInstallCommand() cli.Command {
 	return cli.Command{
-		Name: "install",
+		Name:      "install",
+		ArgsUsage: "GRID",
 		Action: func(c *cli.Context) error {
 			client := kontena.Client{}
+			grid := c.Args().First()
 
 			if err := client.EnsureMasterLogin(); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 
-			grid := c.Parent().String("grid")
-			if client.CurrentGrid().Name == "" || grid != "" {
-				if err := client.GridUse(grid); err != nil {
-					return cli.NewExitError(err, 1)
-				}
+			if grid == "" {
+				return cli.NewExitError("GRID argument not specified", 1)
+			}
+
+			if err := client.GridUse(grid); err != nil {
+				return cli.NewExitError(err, 1)
 			}
 
 			if err := installCertificatesCommand().Run(c); err != nil {
@@ -69,13 +65,13 @@ func gridInstallCommand() cli.Command {
 
 			return nil
 		},
-		Subcommands: []cli.Command{
-			installCoreCommand(),
-			installRegistriesCommand(),
-			pruneStacksCommand(),
-			installStacksCommand(),
-			installCertificatesCommand(),
-		},
+		// Subcommands: []cli.Command{
+		// 	installCoreCommand(),
+		// 	installRegistriesCommand(),
+		// 	pruneStacksCommand(),
+		// 	installStacksCommand(),
+		// 	installCertificatesCommand(),
+		// },
 	}
 }
 
@@ -83,6 +79,7 @@ func installStacksCommand() cli.Command {
 	return cli.Command{
 		Name: "stacks",
 		Action: func(c *cli.Context) error {
+			utils.LogSection("Stacks")
 			client := kontena.Client{}
 
 			stacks, _ := ioutil.ReadDir("./stacks")

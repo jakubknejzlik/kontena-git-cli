@@ -10,7 +10,7 @@ import (
 func main() {
 
 	app := cli.NewApp()
-	app.Name = "Kontena Git CLI"
+	app.Name = "kontena-git"
 	app.Usage = "..."
 	app.Version = "0.0.1"
 
