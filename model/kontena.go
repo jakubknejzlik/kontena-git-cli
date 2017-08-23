@@ -27,13 +27,20 @@ type KontenaService struct {
 	Image     string `yaml:"image,omitempty"`
 	Command   string `yaml:"command,omitempty"`
 	// Entrypoint    string            `yaml:"entrypoint,omitempty"`
-	Volumes     []string          `yaml:"volumes,omitempty"`
-	Labels      map[string]string `yaml:"labels,omitempty"`
-	Environment []string          `yaml:"environment,omitempty"`
-	Links       []string          `yaml:"links,omitempty"`
-	Ports       []string          `yaml:"ports,omitempty"`
-	Secrets     []KontenaSecret   `yaml:"secrets,omitempty"`
-	Deploy      KontenaDeploy     `yaml:"deploy,omitempty"`
+	Volumes     []string              `yaml:"volumes,omitempty"`
+	Labels      map[string]string     `yaml:"labels,omitempty"`
+	Environment []string              `yaml:"environment,omitempty"`
+	Links       []string              `yaml:"links,omitempty"`
+	Ports       []string              `yaml:"ports,omitempty"`
+	Secrets     []KontenaSecret       `yaml:"secrets,omitempty"`
+	Deploy      KontenaDeploy         `yaml:"deploy,omitempty"`
+	Logging     KontenaServiceLogging `yaml:"logging,omitempty"`
+}
+
+// KontenaServiceLogging ...
+type KontenaServiceLogging struct {
+	Driver  string            `yaml:"driver,omitempty"`
+	Options map[string]string `yaml:"options,omitempty"`
 }
 
 // KontenaStack ...
