@@ -12,19 +12,36 @@ import (
 
 // CertificateInstall ...
 func (c *Client) CertificateInstall(cert model.Certificate) error {
-	utils.Log("installing certificate", cert.Domain)
+	return c.CertificateInstallInGrid(c.CurrentGrid().Name, cert)
+}
+
+// CertificateInstallInGrid ...
+func (c *Client) CertificateInstallInGrid(grid string, cert model.Certificate) error {
+	utils.Log("installing certificate", cert.Domain, "in grid", grid)
 	if cert.Bundle != "" {
-		return c.DeployCertificate(cert, cert.Bundle)
+		return c.DeployCertificateInGrid(grid, cert, cert.Bundle)
 	}
 
 	if cert.Bundle == "" && cert.LetsEncrypt {
-		return c.issueLECertificate(cert)
+		return c.issueLECertificateInGrid(grid, cert)
 	}
 
 	return cli.NewExitError(fmt.Sprintf(`certificate %s is not marked as letsencrypt and doesn't contain bundle`, cert.Domain), 1)
 }
 
-func (c *Client) issueLECertificate(cert model.Certificate) error {
+// DeployCertificate ...
+func (c *Client) DeployCertificate(cert model.Certificate, bundle string) error {
+	utils.Log("writing certificate", cert.SecretName())
+	return c.SecretWrite(cert.SecretName(), bundle)
+}
+
+// DeployCertificateInGrid ...
+func (c *Client) DeployCertificateInGrid(grid string, cert model.Certificate, bundle string) error {
+	utils.Log("writing certificate", cert.SecretName(), "grid", grid)
+	return c.SecretWriteToGrid(grid, cert.SecretName(), bundle)
+}
+
+func (c *Client) issueLECertificateInGrid(grid string, cert model.Certificate) error {
 	service := model.KontenaService{
 		Environment: []string{
 			"KONTENA_LB_VIRTUAL_HOSTS=" + cert.Domain,
@@ -37,50 +54,52 @@ func (c *Client) issueLECertificate(cert model.Certificate) error {
 	}
 	serviceName := "acme-challenge"
 
-	c.ServiceRemove(serviceName)
-
-	if err := c.ServiceCreate(serviceName, service); err != nil {
+	if err := c.removeAcmeServiceFromGrid(grid); err != nil {
 		return err
 	}
 
-	if err := c.ServiceDeploy(serviceName); err != nil {
+	if err := c.ServiceCreateInGrid(grid, serviceName, service); err != nil {
+		return err
+	}
+
+	if err := c.ServiceDeployInGrid(grid, serviceName); err != nil {
 		return err
 	}
 
 	utils.Log("issuing certificate")
 	issueCmd := fmt.Sprintf(`/issue.sh %s`, cert.Domain)
-	if data, err := c.ServiceExec(serviceName, issueCmd); err != nil {
+	if data, err := c.ServiceExecInGrid(grid, serviceName, issueCmd); err != nil {
 		log.Println(err, string(data))
 		// return err
 	}
 
 	utils.Log("fetching certificate")
 	loadCertCmd := fmt.Sprintf(`cat /root/.acme.sh/%s/fullchain.cer /root/.acme.sh/%s/%s.key`, cert.Domain, cert.Domain, cert.Domain)
-	if data, err := c.ServiceExec(serviceName, loadCertCmd); err == nil {
+	if data, err := c.ServiceExecInGrid(grid, serviceName, loadCertCmd); err == nil {
 		c.DeployCertificate(cert, string(data))
 	} else {
 		return err
 	}
 
-	return c.removeAcmeService()
+	return c.removeAcmeServiceFromGrid(grid)
 }
 
-// DeployCertificate ...
-func (c *Client) DeployCertificate(cert model.Certificate, bundle string) error {
-	utils.Log("writing certificate", cert.SecretName())
-	return c.WriteSecret(cert.SecretName(), bundle)
-}
-
-func (c *Client) removeAcmeService() error {
+func (c *Client) removeAcmeServiceFromGrid(grid string) error {
+	exists, err := c.ServiceExistsInGrid(grid, "acme-challenge")
+	if err != nil {
+		return err
+	}
+	if exists == false {
+		return nil
+	}
 	utils.Log("removing acme-challenge service")
-	removeServiceCmd := `kontena service remove --force acme-challenge`
-	return utils.RunInteractive(removeServiceCmd)
+	return c.ServiceRemoveFromGrid(grid, "acme-challenge")
 }
 
 // CurrentCertificateSecrets ...
 func (c *Client) CurrentCertificateSecrets() ([]string, error) {
 	certs := []string{}
-	secrets, secretsErr := c.GetSecrets()
+	secrets, secretsErr := c.SecretList()
 
 	if secretsErr != nil {
 		return certs, secretsErr
@@ -95,37 +114,20 @@ func (c *Client) CurrentCertificateSecrets() ([]string, error) {
 	return certs, nil
 }
 
-// kontena service create -e "KONTENA_LB_VIRTUAL_HOSTS=www.knejzlik.cz" -e "KONTENA_LB_VIRTUAL_PATH=/.well-known/acme-challenge" -l core/internet_lb acme-challenge jakubknejzlik/acme.sh-nginx
-// kontena service deploy acme-challenge
-// kontena service exec -it acme-challenge /issue.sh www.knejzlik.cz
-// kontena service rm --force acme-challenge
-//
-//
-// kontena service exec acme-challenge acme.sh --install-cert -d www.knejzlik.cz --key-file /key.pem --fullchain-file /cert.pem --reloadcmd "nginx -s reload" --debug
-//
-//
-//
-//
-// kontena service create --cmd "daemon" test-acmesh neilpang/acme.sh
-// kontena service deploy test-acmesh
-// kontena service exec test-acmesh acme.sh --register-account
-//
-// kontena service exec test-acmesh acme.sh --issue -d www.knejzlik.cz  --stateless
-// kontena service rm --force acme-challenge
-// kontena service rm --force test-acmesh
-//
-// /usr/share/nginx/html
-//
-//
-// kontena service exec test-acmesh nginx
-// kontena service exec test-acmesh curl localhost
-// kontena service create -e "STRING=aUKoszVA-SOvxjMWCzyWpEMidc1-rvRe0DWI_kXw52E" -e "KONTENA_LB_VIRTUAL_HOSTS=www.knejzlik.cz" -e "KONTENA_LB_VIRTUAL_PATH=/.well-known/acme-challenge" -l core/internet_lb --cmd "acme.sh --issue -d www.knejzlik.cz --stateless --debug" test-acmesh neilpang/acme.sh
-//
-// //aUKoszVA-SOvxjMWCzyWpEMidc1-rvRe0DWI_kXw52E
-//
-// kontena service create -e "STRING=MUGnf6WDNzXPgU_dkkFFhIFtUNhVAP31I09plw1pHrg" -e "KONTENA_LB_VIRTUAL_HOSTS=www.knejzlik.cz" -e "KONTENA_LB_VIRTUAL_PATH=/.well-known/acme-challenge" -l core/internet_lb --cmd "acme.sh --issue -d www.knejzlik.cz --stateless --debug" test-acmesh neilpang/acme.sh
-// kontena service create --cmd "acme.sh --issue -d www.knejzlik.cz --stateless --debug" test-acmesh neilpang/acme.sh
-// kontena service create -e "STRING=MUGnf6WDNzXPgU_dkkFFhIFtUNhVAP31I09plw1pHrg" -e "KONTENA_LB_VIRTUAL_HOSTS=www.knejzlik.cz" -e "KONTENA_LB_VIRTUAL_PATH=/.well-known/acme-challenge" --deploy-strategy daemon -l core/internet_lb test-nginx-string jakubknejzlik/nginx-string
-// kontena service deploy test-acmesh && \
-// kontena service logs -t test-acmesh
-// kontena service rm --force test-acmesh
+// CurrentCertificateSecretsInGrid ...
+func (c *Client) CurrentCertificateSecretsInGrid(grid string) ([]string, error) {
+	certs := []string{}
+	secrets, secretsErr := c.SecretListInGrid(grid)
+
+	if secretsErr != nil {
+		return certs, secretsErr
+	}
+
+	for _, secretName := range secrets {
+		if model.IsCertificateName(secretName) {
+			certs = append(certs, secretName)
+		}
+	}
+
+	return certs, nil
+}

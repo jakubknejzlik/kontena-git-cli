@@ -93,7 +93,7 @@ func installStacksCommand() cli.Command {
 				}
 				if !client.StackExists(stackName) {
 					utils.Log("installing stack", stackName)
-					dc := getDefaultStack(stackName, client.HasSecret("VIRTUAL_HOSTS", stackName))
+					dc := getDefaultStack(stackName, client.SecretExists("VIRTUAL_HOSTS", stackName))
 					if err := client.StackInstall(dc); err != nil {
 						return cli.NewExitError(err, 1)
 					}
