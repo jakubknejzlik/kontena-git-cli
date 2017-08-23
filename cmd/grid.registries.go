@@ -15,23 +15,30 @@ func installRegistriesCommand() cli.Command {
 			utils.LogSection("Registries")
 			client := kontena.Client{}
 
-			currentRegistries, err := client.CurrentRegistries()
-			if err != nil {
-				return cli.NewExitError(err, 1)
+			currentRegistries, listErr := client.RegistryList()
+			if listErr != nil {
+				return cli.NewExitError(listErr, 1)
 			}
+
+			registries, loadErr := model.RegistriesLoad("registries.yml")
+			if loadErr != nil {
+				return cli.NewExitError(loadErr, 1)
+			}
+			registryNames := []string{}
+			for _, reg := range registries {
+				registryNames = append(registryNames, reg.Name)
+			}
+
 			for _, regName := range currentRegistries {
-				if client.RegistryExists(regName) {
-					client.RegistryRemove(regName)
+				if utils.ArrayOfStringsContains(currentRegistries, regName) && !utils.ArrayOfStringsContains(registryNames, regName) {
+					if err := client.RegistryRemove(regName); err != nil {
+						return cli.NewExitError(err.Error(), 1)
+					}
 				}
 			}
 
-			registries, err := model.RegistriesLoad("registries.yml")
-			if err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
 			for _, registry := range registries {
-				if !client.RegistryExists(registry.Name) {
+				if !utils.ArrayOfStringsContains(currentRegistries, registry.Name) && utils.ArrayOfStringsContains(registryNames, registry.Name) {
 					if err := client.RegistryAdd(registry); err != nil {
 						return cli.NewExitError(err, 1)
 					}
