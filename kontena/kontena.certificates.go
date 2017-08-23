@@ -85,15 +85,18 @@ func (c *Client) issueLECertificateInGrid(grid string, cert model.Certificate) e
 }
 
 func (c *Client) removeAcmeServiceFromGrid(grid string) error {
-	exists, err := c.ServiceExistsInGrid(grid, "acme-challenge")
+	exists, err := c.ServiceExistsInGrid(grid, "", "acme-challenge")
 	if err != nil {
 		return err
 	}
 	if exists == false {
 		return nil
 	}
+	if err := c.GridUse(grid); err != nil {
+		return err
+	}
 	utils.Log("removing acme-challenge service")
-	return c.ServiceRemoveFromGrid(grid, "acme-challenge")
+	return c.ServiceRemove("acme-challenge")
 }
 
 // CurrentCertificateSecrets ...

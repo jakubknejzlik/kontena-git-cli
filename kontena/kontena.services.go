@@ -114,12 +114,6 @@ func (c *Client) ServiceRemove(service string) error {
 	return utils.RunInteractive(fmt.Sprintf("kontena service rm --force %s", service))
 }
 
-// ServiceRemoveFromGrid ...
-func (c *Client) ServiceRemoveFromGrid(grid, service string) error {
-	utils.Log("removing service", service)
-	return utils.RunInteractive(fmt.Sprintf("kontena service rm --grid %s --force %s", grid, service))
-}
-
 // ServiceList ...
 func (c *Client) ServiceList() ([]string, error) {
 	data, err := utils.Run("kontena service ls -q")
@@ -139,21 +133,21 @@ func (c *Client) ServiceListInGrid(grid string) ([]string, error) {
 }
 
 // ServiceExists ...
-func (c *Client) ServiceExists(service string) (bool, error) {
-	services, err := c.ServiceList()
-	if err != nil {
-		return false, err
-	}
-	return utils.ArrayOfStringsContains(services, service), nil
+func (c *Client) ServiceExists(stack, service string) (bool, error) {
+	grid := c.CurrentGrid().Name
+	return c.ServiceExistsInGrid(grid, stack, service)
 }
 
 // ServiceExistsInGrid ...
-func (c *Client) ServiceExistsInGrid(grid, service string) (bool, error) {
+func (c *Client) ServiceExistsInGrid(grid, stack, service string) (bool, error) {
 	services, err := c.ServiceListInGrid(grid)
 	if err != nil {
 		return false, err
 	}
-	return utils.ArrayOfStringsContains(services, service), nil
+	if stack == "" {
+		stack = "null"
+	}
+	return utils.ArrayOfStringsContains(services, grid+"/"+stack+"/"+service), nil
 }
 
 // ServiceLogs ...
