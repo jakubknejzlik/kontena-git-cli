@@ -2,6 +2,7 @@ package kontena
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/jakubknejzlik/kontena-git-cli/model"
@@ -77,6 +78,16 @@ func (c *Client) ServiceExecInGrid(grid, service, command string) ([]byte, error
 	return utils.Run(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
 }
 
+// ServiceExecCommand ...
+func (c *Client) ServiceExecCommand(service, command string) *exec.Cmd {
+	return utils.RunCommand(fmt.Sprintf("kontena service exec %s %s", service, command))
+}
+
+// ServiceExecInGridCommand ...
+func (c *Client) ServiceExecInGridCommand(grid, service, command string) *exec.Cmd {
+	return utils.RunCommand(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
+}
+
 // ServiceInStackExec ...
 func (c *Client) ServiceInStackExec(stack, service, command string) ([]byte, error) {
 	return c.ServiceExec(stack+"/"+service, command)
@@ -85,6 +96,16 @@ func (c *Client) ServiceInStackExec(stack, service, command string) ([]byte, err
 // ServiceInStackInGridExec ...
 func (c *Client) ServiceInStackInGridExec(grid, stack, service, command string) ([]byte, error) {
 	return c.ServiceExecInGrid(grid, stack+"/"+service, command)
+}
+
+// ServiceInStackExecCommand ...
+func (c *Client) ServiceInStackExecCommand(stack, service, command string) *exec.Cmd {
+	return c.ServiceExecCommand(stack+"/"+service, command)
+}
+
+// ServiceInStackInGridExecCommand ...
+func (c *Client) ServiceInStackInGridExecCommand(grid, stack, service, command string) *exec.Cmd {
+	return c.ServiceExecInGridCommand(grid, stack+"/"+service, command)
 }
 
 // ServiceRemove ...

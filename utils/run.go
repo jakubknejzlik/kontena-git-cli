@@ -9,6 +9,11 @@ import (
 	"github.com/urfave/cli"
 )
 
+// RunCommand ...
+func RunCommand(cmd string) *exec.Cmd {
+	return exec.Command("sh", "-c", cmd)
+}
+
 // Run ...
 func Run(cmd string) ([]byte, error) {
 	command := exec.Command("sh", "-c", cmd)
