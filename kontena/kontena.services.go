@@ -155,3 +155,21 @@ func (c *Client) ServiceExistsInGrid(grid, service string) (bool, error) {
 	}
 	return utils.ArrayOfStringsContains(services, service), nil
 }
+
+// ServiceLogs ...
+func (c *Client) ServiceLogs(service string) (string, error) {
+	data, err := utils.Run(fmt.Sprintf("kontena service logs %s", service))
+	return string(data), err
+}
+
+// ServiceInStackLogs ...
+func (c *Client) ServiceInStackLogs(stack, service string) (string, error) {
+	data, err := utils.Run(fmt.Sprintf("kontena service logs %s/%s", stack, service))
+	return string(data), err
+}
+
+// ServiceInStackInGridLogs ...
+func (c *Client) ServiceInStackInGridLogs(grid, stack, service string) (string, error) {
+	data, err := utils.Run(fmt.Sprintf("kontena service logs --grid %s %s/%s", grid, stack, service))
+	return string(data), err
+}
