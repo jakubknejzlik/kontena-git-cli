@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"path"
 	"regexp"
-	"strings"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
@@ -56,11 +55,14 @@ func CertificateLoadLocals() (map[string]Certificate, error) {
 
 // SecretName ...
 func (c Certificate) SecretName() string {
-	return "core_SSL_CERTIFICATE_" + strings.Replace(c.Domain, ".", "_", -1) + "_BUNDLE"
+	rg := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	name := rg.ReplaceAllString(c.Domain, "_")
+
+	return "core_SSL_CERTIFICATE_" + name + "_BUNDLE"
 }
 
 // IsCertificateName ...
 func IsCertificateName(name string) bool {
-	re := regexp.MustCompile(`core_SSL_CERTIFICATE_[a-z0-9\*_]+_BUNDLE`)
+	re := regexp.MustCompile(`core_SSL_CERTIFICATE_[a-zA-Z0-9_]+_BUNDLE`)
 	return re.Match([]byte(name))
 }
