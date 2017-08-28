@@ -19,6 +19,7 @@ func GridCommand() cli.Command {
 		Name: "grid",
 		Subcommands: []cli.Command{
 			gridInstallCommand(),
+			gridDeployCommand(),
 		},
 	}
 }
@@ -77,13 +78,36 @@ func gridInstallCommand() cli.Command {
 
 			return nil
 		},
-		// Subcommands: []cli.Command{
-		// 	installCoreCommand(),
-		// 	installRegistriesCommand(),
-		// 	pruneStacksCommand(),
-		// 	installStacksCommand(),
-		// 	installCertificatesCommand(),
-		// },
+	}
+}
+
+func gridDeployCommand() cli.Command {
+	return cli.Command{
+		Name:        "deploy",
+		ArgsUsage:   "GRID",
+		Description: "Deploy all stacks in grid",
+		Action: func(c *cli.Context) error {
+			client := kontena.Client{}
+			grid := c.Args().First()
+
+			if err := client.EnsureMasterLogin(); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if grid == "" {
+				return cli.NewExitError("GRID argument not specified", 1)
+			}
+
+			if err := client.GridUse(grid); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if err := deployStacksCommand().Run(c); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			return nil
+		},
 	}
 }
 
