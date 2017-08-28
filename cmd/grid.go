@@ -27,6 +27,12 @@ func gridInstallCommand() cli.Command {
 	return cli.Command{
 		Name:      "install",
 		ArgsUsage: "GRID",
+		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:  "deploy",
+				Usage: "automatically deploy all services",
+			},
+		},
 		Action: func(c *cli.Context) error {
 			client := kontena.Client{}
 			grid := c.Args().First()
@@ -59,8 +65,14 @@ func gridInstallCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := installStacksCommand().Run(c); err != nil {
+			if err := installOrUpgradeStacksCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
+			}
+
+			if c.Bool("deploy") {
+				if err := deployStacksCommand().Run(c); err != nil {
+					return cli.NewExitError(err, 1)
+				}
 			}
 
 			return nil
@@ -75,11 +87,11 @@ func gridInstallCommand() cli.Command {
 	}
 }
 
-func installStacksCommand() cli.Command {
+func installOrUpgradeStacksCommand() cli.Command {
 	return cli.Command{
 		Name: "stacks",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Stacks")
+			utils.LogSection("Installing/upgrading stacks")
 			client := kontena.Client{}
 
 			stacks, _ := ioutil.ReadDir("./stacks")
@@ -101,12 +113,29 @@ func installStacksCommand() cli.Command {
 							return cli.NewExitError(err, 1)
 						}
 					}
-					utils.Log("deploying stack", stackName)
-					if err := client.StackDeploy(stackName); err != nil {
-						return cli.NewExitError(err, 1)
-					}
 				}
-				time.Sleep(time.Second * 3)
+				time.Sleep(time.Second * 1)
+			}
+			return nil
+		},
+	}
+}
+
+func deployStacksCommand() cli.Command {
+	return cli.Command{
+		Name: "stacks",
+		Action: func(c *cli.Context) error {
+			utils.LogSection("Deploying stacks")
+			client := kontena.Client{}
+
+			stacks, _ := ioutil.ReadDir("./stacks")
+			for _, stack := range stacks {
+				stackName := stack.Name()
+
+				utils.Log("deploying stack", stackName)
+				if err := client.StackDeploy(stackName); err != nil {
+					return cli.NewExitError(err, 1)
+				}
 			}
 			return nil
 		},
