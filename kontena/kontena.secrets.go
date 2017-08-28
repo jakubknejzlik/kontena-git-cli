@@ -37,11 +37,13 @@ func (c *Client) SecretsImport(stack, path string) error {
 
 	for key, value := range secrets {
 		secretKey := fmt.Sprintf("%s_%s", stack, key)
-		if !utils.ArrayOfStringsContains(oldSecrets, secretKey) {
+		if utils.ArrayOfStringsContains(oldSecrets, secretKey) {
+			utils.Log("updating secret", stack+":"+key)
+		} else {
 			utils.Log("adding secret", stack+":"+key)
-			if err := c.SecretWrite(secretKey, value); err != nil {
-				return err
-			}
+		}
+		if err := c.SecretWrite(secretKey, value); err != nil {
+			return err
 		}
 	}
 
