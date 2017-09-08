@@ -35,6 +35,7 @@ type KontenaService struct {
 	Secrets     []KontenaSecret       `yaml:"secrets"`
 	Deploy      KontenaDeploy         `yaml:"deploy,omitempty"`
 	Logging     KontenaServiceLogging `yaml:"logging,omitempty"`
+	Stateful    bool                  `yaml:"stateful,omitempty"`
 }
 
 // KontenaServiceLogging ...
