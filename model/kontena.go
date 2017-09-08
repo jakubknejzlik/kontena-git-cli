@@ -47,7 +47,13 @@ type KontenaServiceLogging struct {
 type KontenaStack struct {
 	Name     string                    `yaml:"stack,omitempty"`
 	Version  string                    `yaml:"version,omitempty"`
-	Services map[string]KontenaService `yaml:"services,omitempty"`
+	Services map[string]KontenaService `yaml:"services"`
+	Volumes  map[string]KontenaVolume  `yaml:"volumes"`
+}
+
+// KontenaVolume ...
+type KontenaVolume struct {
+	External bool `yaml:"external,omitempty"`
 }
 
 // KontenaLoad ...
