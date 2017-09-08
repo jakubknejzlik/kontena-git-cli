@@ -28,7 +28,6 @@ type KontenaService struct {
 	Command   string `yaml:"command,omitempty"`
 	// Entrypoint    string            `yaml:"entrypoint,omitempty"`
 	Volumes     []string              `yaml:"volumes"`
-	Labels      map[string]string     `yaml:"labels"`
 	Environment []string              `yaml:"environment"`
 	Links       []string              `yaml:"links"`
 	Ports       []string              `yaml:"ports"`
