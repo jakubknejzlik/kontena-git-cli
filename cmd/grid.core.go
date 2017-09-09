@@ -69,7 +69,7 @@ func defaultLoadBalancer() model.KontenaService {
 	return model.KontenaService{
 		Image: "kontena/lb:latest",
 		Ports: []string{"80:80", "443:443"},
-		Deploy: model.KontenaDeploy{
+		Deploy: model.KontenaServiceDeploy{
 			Strategy: "daemon",
 		},
 	}
