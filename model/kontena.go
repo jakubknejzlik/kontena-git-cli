@@ -27,34 +27,34 @@ type KontenaSecret struct {
 
 // KontenaService ...
 type KontenaService struct {
-	Image           string                    `yaml:"image,omitempty"`
-	Instances       *int                      `yaml:"instances,omitempty"`
-	Stateful        bool                      `yaml:"stateful,omitempty"`
-	Command         string                    `yaml:"command,omitempty"`
-	Volumes         []string                  `yaml:"volumes"`
-	VolumesFrom     []string                  `yaml:"volumes_from"`
-	Environment     []string                  `yaml:"environment"`
-	EnvFile         string                    `yaml:"env_file,omitempty"`
-	Links           []string                  `yaml:"links"`
-	DependsOn       []string                  `yaml:"depends_on"`
-	Ports           []string                  `yaml:"ports"`
-	Affinity        []string                  `yaml:"affinity"`
-	CapAdd          []string                  `yaml:"cap_add"`
-	CapDrop         []string                  `yaml:"cap_drop"`
-	CPUShares       *int                      `yaml:"cpu_shares"`
-	MemLimit        string                    `yaml:"mem_limit,omitempty"`
-	MemswapLimit    string                    `yaml:"memswap_limit,omitempty"`
-	StopGracePeriod string                    `yaml:"stop_grace_period,omitempty"`
-	NetworkMode     string                    `yaml:"network_mode,omitempty"`
-	Pid             string                    `yaml:"pid,omitempty"`
-	Privileged      bool                      `yaml:"privileged,omitempty"`
-	User            string                    `yaml:"user,omitempty"`
-	Secrets         []KontenaSecret           `yaml:"secrets"`
-	Hooks           []KontenaServiceHook      `yaml:"hooks"`
-	Extends         KontenaServiceExtends     `yaml:"extends,omitempty"`
-	Deploy          KontenaServiceDeploy      `yaml:"deploy,omitempty"`
-	Logging         KontenaServiceLogging     `yaml:"logging,omitempty"`
-	HealthCheck     KontenaServiceHealthCheck `yaml:"health_check,omitempty"`
+	Image           string                        `yaml:"image,omitempty"`
+	Instances       *int                          `yaml:"instances,omitempty"`
+	Stateful        bool                          `yaml:"stateful,omitempty"`
+	Command         string                        `yaml:"command,omitempty"`
+	Volumes         []string                      `yaml:"volumes"`
+	VolumesFrom     []string                      `yaml:"volumes_from"`
+	Environment     []string                      `yaml:"environment"`
+	EnvFile         string                        `yaml:"env_file,omitempty"`
+	Links           []string                      `yaml:"links"`
+	DependsOn       []string                      `yaml:"depends_on"`
+	Ports           []string                      `yaml:"ports"`
+	Affinity        []string                      `yaml:"affinity"`
+	CapAdd          []string                      `yaml:"cap_add"`
+	CapDrop         []string                      `yaml:"cap_drop"`
+	CPUShares       *int                          `yaml:"cpu_shares"`
+	MemLimit        string                        `yaml:"mem_limit,omitempty"`
+	MemswapLimit    string                        `yaml:"memswap_limit,omitempty"`
+	StopGracePeriod string                        `yaml:"stop_grace_period,omitempty"`
+	NetworkMode     string                        `yaml:"network_mode,omitempty"`
+	Pid             string                        `yaml:"pid,omitempty"`
+	Privileged      bool                          `yaml:"privileged,omitempty"`
+	User            string                        `yaml:"user,omitempty"`
+	Secrets         []KontenaSecret               `yaml:"secrets"`
+	Hooks           map[string]KontenaServiceHook `yaml:"hooks"`
+	Extends         KontenaServiceExtends         `yaml:"extends,omitempty"`
+	Deploy          KontenaServiceDeploy          `yaml:"deploy,omitempty"`
+	Logging         KontenaServiceLogging         `yaml:"logging,omitempty"`
+	HealthCheck     KontenaServiceHealthCheck     `yaml:"health_check,omitempty"`
 }
 
 // KontenaServiceExtends ...
