@@ -9,6 +9,15 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
+// KontenaStack ...
+type KontenaStack struct {
+	Name     string                    `yaml:"stack,omitempty"`
+	Version  string                    `yaml:"version,omitempty"`
+	Expose   string                    `yaml:"expose,omitempty"`
+	Services map[string]KontenaService `yaml:"services"`
+	Volumes  map[string]KontenaVolume  `yaml:"volumes"`
+}
+
 // KontenaSecret ...
 type KontenaSecret struct {
 	Secret string `yaml:"secret,omitempty"`
@@ -16,25 +25,58 @@ type KontenaSecret struct {
 	Type   string `yaml:"type,omitempty"`
 }
 
-// KontenaDeploy ...
-type KontenaDeploy struct {
-	Strategy string `yaml:"strategy,omitempty"`
-}
-
 // KontenaService ...
 type KontenaService struct {
-	Instances *int   `yaml:"instances,omitempty"`
-	Image     string `yaml:"image,omitempty"`
-	Command   string `yaml:"command,omitempty"`
-	// Entrypoint    string            `yaml:"entrypoint,omitempty"`
-	Volumes     []string              `yaml:"volumes"`
-	Environment []string              `yaml:"environment"`
-	Links       []string              `yaml:"links"`
-	Ports       []string              `yaml:"ports"`
-	Secrets     []KontenaSecret       `yaml:"secrets"`
-	Deploy      KontenaDeploy         `yaml:"deploy,omitempty"`
-	Logging     KontenaServiceLogging `yaml:"logging,omitempty"`
-	Stateful    bool                  `yaml:"stateful,omitempty"`
+	Image           string                    `yaml:"image,omitempty"`
+	Instances       *int                      `yaml:"instances,omitempty"`
+	Stateful        bool                      `yaml:"stateful,omitempty"`
+	Command         string                    `yaml:"command,omitempty"`
+	Volumes         []string                  `yaml:"volumes"`
+	VolumesFrom     []string                  `yaml:"volumes_from"`
+	Environment     []string                  `yaml:"environment"`
+	EnvFile         string                    `yaml:"env_file,omitempty"`
+	Links           []string                  `yaml:"links"`
+	DependsOn       []string                  `yaml:"depends_on"`
+	Ports           []string                  `yaml:"ports"`
+	Affinity        []string                  `yaml:"affinity"`
+	CapAdd          []string                  `yaml:"cap_add"`
+	CapDrop         []string                  `yaml:"cap_drop"`
+	CPUShares       *int                      `yaml:"cpu_shares"`
+	MemLimit        string                    `yaml:"mem_limit,omitempty"`
+	MemswapLimit    string                    `yaml:"memswap_limit,omitempty"`
+	StopGracePeriod string                    `yaml:"stop_grace_period,omitempty"`
+	NetworkMode     string                    `yaml:"network_mode,omitempty"`
+	Pid             string                    `yaml:"pid,omitempty"`
+	Privileged      bool                      `yaml:"privileged,omitempty"`
+	User            string                    `yaml:"user,omitempty"`
+	Secrets         []KontenaSecret           `yaml:"secrets"`
+	Hooks           []KontenaServiceHook      `yaml:"hooks"`
+	Extends         KontenaServiceExtends     `yaml:"extends,omitempty"`
+	Deploy          KontenaServiceDeploy      `yaml:"deploy,omitempty"`
+	Logging         KontenaServiceLogging     `yaml:"logging,omitempty"`
+	HealthCheck     KontenaServiceHealthCheck `yaml:"health_check,omitempty"`
+}
+
+// KontenaServiceExtends ...
+type KontenaServiceExtends struct {
+	File    string `yaml:"file,omitempty"`
+	Service string `yaml:"service,omitempty"`
+}
+
+// KontenaServiceDeploy ...
+type KontenaServiceDeploy struct {
+	Strategy    string  `yaml:"strategy,omitempty"`
+	WaitForPort int     `yaml:"wait_for_port,omitempty"`
+	MinHealth   float32 `yaml:"min_health,omitempty"`
+	Interval    string  `yaml:"interval,omitempty"`
+}
+
+// KontenaServiceHook ...
+type KontenaServiceHook struct {
+	Name     string `yaml:"name,omitempty"`
+	Cmd      string `yaml:"cmd,omitempty"`
+	Instance string `yaml:"instance,omitempty"`
+	OneShot  bool   `yaml:"one_shot,omitempty"`
 }
 
 // KontenaServiceLogging ...
@@ -43,12 +85,14 @@ type KontenaServiceLogging struct {
 	Options map[string]string `yaml:"options,omitempty"`
 }
 
-// KontenaStack ...
-type KontenaStack struct {
-	Name     string                    `yaml:"stack,omitempty"`
-	Version  string                    `yaml:"version,omitempty"`
-	Services map[string]KontenaService `yaml:"services"`
-	Volumes  map[string]KontenaVolume  `yaml:"volumes"`
+// KontenaServiceHealthCheck ...
+type KontenaServiceHealthCheck struct {
+	Protocol     string `yaml:"protocol,omitempty"`
+	Port         int    `yaml:"port,omitempty"`
+	Interval     int    `yaml:"interval,omitempty"`
+	URI          string `yaml:"uri,omitempty"`
+	InitialDelay int    `yaml:"initial_delay,omitempty"`
+	Timeout      int    `yaml:"timeout,omitempty"`
 }
 
 // KontenaVolume ...
