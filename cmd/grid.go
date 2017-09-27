@@ -50,11 +50,11 @@ func gridInstallCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := installCertificatesCommand().Run(c); err != nil {
+			if err := installCoreCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := installCoreCommand().Run(c); err != nil {
+			if err := installCertificatesCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 
