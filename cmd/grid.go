@@ -50,11 +50,18 @@ func gridInstallCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := installCoreCommand().Run(c); err != nil {
-				return cli.NewExitError(err, 1)
+			// install stack if not already installed to be able to run installCertificatesCommand
+			if client.StackExists("core") == false {
+				if err := installCoreCommand().Run(c); err != nil {
+					return cli.NewExitError(err, 1)
+				}
 			}
 
 			if err := installCertificatesCommand().Run(c); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if err := installCoreCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 
