@@ -128,7 +128,7 @@ func (c *Client) stackAction(action, name string, stack model.KontenaStack) erro
 
 	defer os.Remove(dsPath)
 
-	cmd := fmt.Sprintf("kontena stack upgrade --no-deploy %s %s", name, dsPath)
+	cmd := fmt.Sprintf("kontena stack upgrade --force --no-deploy %s %s", name, dsPath)
 	if action == "install" {
 		cmd = fmt.Sprintf("kontena stack install --name %s %s", name, dsPath)
 	}
