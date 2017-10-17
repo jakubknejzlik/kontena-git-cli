@@ -143,7 +143,7 @@ func (c *Client) stackActionInGrid(grid, action, name string, stack model.Konten
 
 	defer os.Remove(dsPath)
 
-	cmd := fmt.Sprintf("kontena stack upgrade --grid %s --no-deploy %s %s", grid, name, dsPath)
+	cmd := fmt.Sprintf("kontena stack upgrade --force --grid %s --no-deploy %s %s", grid, name, dsPath)
 	if action == "install" {
 		cmd = fmt.Sprintf("kontena stack install --grid %s --name %s %s", grid, name, dsPath)
 	}
