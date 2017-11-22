@@ -8,6 +8,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
+	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 	"github.com/urfave/cli"
 )
@@ -27,17 +28,21 @@ func (c *Client) SecretsImport(stack, path string) error {
 	if err != nil {
 		return err
 	}
+	oldSecretNames := []string{}
 	for _, secret := range oldSecrets {
-		secretKey := strings.Replace(secret, stack+"_", "", 1)
-		if strings.HasPrefix(secret, stack+"_") && secrets[secretKey] == "" {
-			utils.Log("removing secret", strings.Replace(secret, stack+"_", stack+":", 1))
-			c.SecretRemove(secret)
+		oldSecretNames = append(oldSecretNames, secret.Name)
+	}
+	for _, secret := range oldSecrets {
+		secretKey := strings.Replace(secret.Name, stack+"_", "", 1)
+		if strings.HasPrefix(secret.Name, stack+"_") && secrets[secretKey] == "" {
+			utils.Log("removing secret", strings.Replace(secret.Name, stack+"_", stack+":", 1))
+			c.SecretRemove(secret.Name)
 		}
 	}
 
 	for key, value := range secrets {
 		secretKey := fmt.Sprintf("%s_%s", stack, key)
-		if utils.ArrayOfStringsContains(oldSecrets, secretKey) {
+		if utils.ArrayOfStringsContains(oldSecretNames, secretKey) {
 			utils.Log("updating secret", stack+":"+key)
 		} else {
 			utils.Log("adding secret", stack+":"+key)
@@ -87,21 +92,23 @@ func (c *Client) SecretRemoveFromGrid(grid, secret string) error {
 }
 
 // SecretList ...
-func (c *Client) SecretList() ([]string, error) {
-	data, err := utils.Run("kontena vault ls -q")
+func (c *Client) SecretList() ([]model.Secret, error) {
+	data, err := utils.Run("kontena vault ls -l")
 	if err != nil {
-		return []string{}, err
+		return []model.Secret{}, err
 	}
-	return utils.SplitString(string(data), "\n"), nil
+	rows := utils.SplitString(string(data), "\n")
+	return model.SecretParseList(rows)
 }
 
 // SecretListInGrid ...
-func (c *Client) SecretListInGrid(grid string) ([]string, error) {
-	data, err := utils.Run(fmt.Sprintf("kontena vault ls --grid %s -q", grid))
+func (c *Client) SecretListInGrid(grid string) ([]model.Secret, error) {
+	data, err := utils.Run(fmt.Sprintf("kontena vault ls -l --grid %s", grid))
 	if err != nil {
-		return []string{}, err
+		return []model.Secret{}, err
 	}
-	return utils.SplitString(string(data), "\n"), nil
+	rows := utils.SplitString(string(data), "\n")
+	return model.SecretParseList(rows)
 }
 
 // SecretValue ...

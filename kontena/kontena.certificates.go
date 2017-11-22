@@ -100,17 +100,17 @@ func (c *Client) removeAcmeServiceFromGrid(grid string) error {
 }
 
 // CurrentCertificateSecrets ...
-func (c *Client) CurrentCertificateSecrets() ([]string, error) {
-	certs := []string{}
+func (c *Client) CurrentCertificateSecrets() ([]model.Secret, error) {
+	certs := []model.Secret{}
 	secrets, secretsErr := c.SecretList()
 
 	if secretsErr != nil {
 		return certs, secretsErr
 	}
 
-	for _, secretName := range secrets {
-		if model.IsCertificateName(secretName) {
-			certs = append(certs, secretName)
+	for _, secret := range secrets {
+		if secret.IsCertificate() {
+			certs = append(certs, secret)
 		}
 	}
 
@@ -118,17 +118,17 @@ func (c *Client) CurrentCertificateSecrets() ([]string, error) {
 }
 
 // CurrentCertificateSecretsInGrid ...
-func (c *Client) CurrentCertificateSecretsInGrid(grid string) ([]string, error) {
-	certs := []string{}
+func (c *Client) CurrentCertificateSecretsInGrid(grid string) ([]model.Secret, error) {
+	certs := []model.Secret{}
 	secrets, secretsErr := c.SecretListInGrid(grid)
 
 	if secretsErr != nil {
 		return certs, secretsErr
 	}
 
-	for _, secretName := range secrets {
-		if model.IsCertificateName(secretName) {
-			certs = append(certs, secretName)
+	for _, secret := range secrets {
+		if secret.IsCertificate() {
+			certs = append(certs, secret)
 		}
 	}
 

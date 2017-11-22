@@ -20,6 +20,7 @@ func GridCommand() cli.Command {
 		Subcommands: []cli.Command{
 			gridInstallCommand(),
 			gridDeployCommand(),
+			gridCleanupCommand(),
 		},
 	}
 }
@@ -110,6 +111,40 @@ func gridDeployCommand() cli.Command {
 			}
 
 			if err := deployStacksCommand().Run(c); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			return nil
+		},
+	}
+}
+
+func gridCleanupCommand() cli.Command {
+	return cli.Command{
+		Name:        "cleanup",
+		ArgsUsage:   "GRID",
+		Description: "Cleanup grid (renew certificates, etc.)",
+		Action: func(c *cli.Context) error {
+			client := kontena.Client{}
+			grid := c.Args().First()
+
+			if err := client.EnsureMasterLogin(); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if grid == "" {
+				return cli.NewExitError("GRID argument not specified", 1)
+			}
+
+			if err := client.GridUse(grid); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if err := clearExpiredCertificatesCommand().Run(c); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			if err := installCertificatesCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 

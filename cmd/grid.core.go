@@ -34,7 +34,7 @@ func installCoreCommand() cli.Command {
 
 			for _, secret := range currentCertificates {
 				s := model.KontenaSecret{
-					Secret: strings.Replace(secret, "core_", "", 1),
+					Secret: strings.Replace(secret.Name, "core_", "", 1),
 					Name:   "SSL_CERTS",
 					Type:   "env",
 				}
