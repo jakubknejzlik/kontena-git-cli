@@ -17,6 +17,7 @@ func main() {
 	app.Commands = []cli.Command{
 		cmd.GridCommand(),
 		cmd.StackCommand(),
+		cmd.ServiceCommand(),
 		cmd.CertificatesCommand(),
 	}
 
