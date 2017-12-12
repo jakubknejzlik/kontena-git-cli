@@ -170,7 +170,7 @@ func installOrUpgradeStacksCommand() cli.Command {
 					utils.Log("installing stack", stackName)
 					dc, stackErr := getStackFromGrid(stackName)
 					if stackErr != nil {
-						dc = getDefaultStack(stackName, client.SecretExists("VIRTUAL_HOSTS", stackName))
+						dc = getDefaultStack(stackName)
 					}
 
 					if err := client.StackInstall(dc); err != nil {
@@ -221,7 +221,7 @@ func getStackFromGrid(name string) (model.KontenaStack, error) {
 	return model.KontenaLoad(stackConfigPath)
 }
 
-func getDefaultStack(name string, hasHost bool) model.KontenaStack {
+func getDefaultStack(name string) model.KontenaStack {
 	return model.KontenaStack{
 		Name:     name,
 		Version:  "0.0.1",
