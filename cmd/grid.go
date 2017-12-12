@@ -222,28 +222,9 @@ func getStackFromGrid(name string) (model.KontenaStack, error) {
 }
 
 func getDefaultStack(name string, hasHost bool) model.KontenaStack {
-	secrets := []model.KontenaSecret{}
-	links := []string{}
-
-	if hasHost {
-		hostSecret := model.KontenaSecret{
-			Secret: "VIRTUAL_HOSTS",
-			Name:   "KONTENA_LB_VIRTUAL_HOSTS",
-			Type:   "env",
-		}
-		secrets = append(secrets, hostSecret)
-		links = append(links, "core/internet_lb")
-	}
-
 	return model.KontenaStack{
-		Name:    name,
-		Version: "0.0.1",
-		Services: map[string]model.KontenaService{
-			"web": model.KontenaService{
-				Image:   "ksdn117/test-page",
-				Links:   links,
-				Secrets: secrets,
-			},
-		},
+		Name:     name,
+		Version:  "0.0.1",
+		Services: map[string]model.KontenaService{},
 	}
 }
