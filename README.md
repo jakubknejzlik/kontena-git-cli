@@ -13,6 +13,13 @@ As it's not recommended to store secrets with project sources this cli assumes y
 * `grid repository` - store list of stacks, registries, certificates and core configuration (see below)
 * `project repository(ies)` - project sources and deployment configuration
 
+### Environment variables
+
+This script communicates with kontena master. Ensure, that you have following environment variables correctly set:
+
+* `KONTENA_MASTER_URL` - api url of kontena master
+* `KONTENA_TOKEN` - kontena master token (see `kontena master token create/current`)
+
 # Grid repository
 
 Structure of this repository should be:
