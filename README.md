@@ -30,7 +30,7 @@ Structure of this repository should be:
 |      |--- *.example.com  // full certificate in pem format
 |--- certificates.yml // list of certificates managed by kontena (see certificates format)
 |--- registries.yml // list of registries (see registry format)
-|--- kontena.yml // core stack configuration (see core stack)
+└--- kontena.yml // core stack configuration (see core stack)
 ```
 
 ### Certificates format:
@@ -127,11 +127,11 @@ services:
 Example pipeline configuration file (Gitlab-ci `.gitlab-ci.yml`):
 
 ```
-image: jakubknejzlik/kontena-git-cli
 stages:
   - deploy
 
 deploy:
+  image: jakubknejzlik/kontena-git-cli
   tags:
     - docker
   stage: deploy
@@ -154,6 +154,7 @@ stages:
   - seed
 
 seed-database:
+  image: jakubknejzlik/kontena-git-cli
   tags:
     - docker
   stage: seed
