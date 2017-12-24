@@ -19,7 +19,7 @@ func installCoreCommand() cli.Command {
 
 			dc, err := model.KontenaLoad("kontena.yml")
 			if err != nil {
-				dc = defaultRootStack()
+				dc = defaultCoreStack()
 			}
 
 			if dc.Services["internet_lb"].Image == "" {
@@ -55,7 +55,7 @@ func installCoreCommand() cli.Command {
 	}
 }
 
-func defaultRootStack() model.KontenaStack {
+func defaultCoreStack() model.KontenaStack {
 	return model.KontenaStack{
 		Name:    "core",
 		Version: "1.0.0",
