@@ -223,8 +223,10 @@ func getStackFromGrid(name string) (model.KontenaStack, error) {
 
 func getDefaultStack(name string) model.KontenaStack {
 	return model.KontenaStack{
-		Name:     name,
-		Version:  "0.0.1",
-		Services: map[string]model.KontenaService{},
+		Name:    name,
+		Version: "0.0.1",
+		Services: map[string]model.KontenaService{
+			"dummy": model.KontenaService{Image: "tutum/hello-world:latest"},
+		},
 	}
 }
