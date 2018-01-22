@@ -36,6 +36,13 @@ func ServiceCommand() cli.Command {
 func stackRunCommand() cli.Command {
 	return cli.Command{
 		Name: "exec",
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:   "grid",
+				EnvVar: "GRID",
+				Usage:  "grid used for installing",
+			},
+		},
 		Action: func(c *cli.Context) error {
 			grid := c.String("grid")
 
