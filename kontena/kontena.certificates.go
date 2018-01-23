@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/urfave/cli"
-
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
 
 // CertificateInstall ...
@@ -17,7 +16,7 @@ func (c *Client) CertificateInstall(cert model.Certificate) error {
 
 // CertificateInstallInGrid ...
 func (c *Client) CertificateInstallInGrid(grid string, cert model.Certificate) error {
-	utils.Log("installing certificate", cert.Domain, "in grid", grid)
+	goclitools.Log("installing certificate", cert.Domain, "in grid", grid)
 	if cert.Bundle != "" {
 		return c.DeployCertificateInGrid(grid, cert, cert.Bundle)
 	}
@@ -31,13 +30,13 @@ func (c *Client) CertificateInstallInGrid(grid string, cert model.Certificate) e
 
 // DeployCertificate ...
 func (c *Client) DeployCertificate(cert model.Certificate, bundle string) error {
-	utils.Log("writing certificate", cert.SecretName())
+	goclitools.Log("writing certificate", cert.SecretName())
 	return c.SecretWrite(cert.SecretName(), bundle)
 }
 
 // DeployCertificateInGrid ...
 func (c *Client) DeployCertificateInGrid(grid string, cert model.Certificate, bundle string) error {
-	utils.Log("writing certificate", cert.SecretName(), "grid", grid)
+	goclitools.Log("writing certificate", cert.SecretName(), "grid", grid)
 	return c.SecretWriteToGrid(grid, cert.SecretName(), bundle)
 }
 
@@ -66,14 +65,14 @@ func (c *Client) issueLECertificateInGrid(grid string, cert model.Certificate) e
 		return err
 	}
 
-	utils.Log("issuing certificate")
+	goclitools.Log("issuing certificate")
 	issueCmd := fmt.Sprintf(`/issue.sh %s`, cert.Domain)
 	if data, err := c.ServiceExecInGrid(grid, serviceName, issueCmd); err != nil {
 		log.Println(err, string(data))
 		// return err
 	}
 
-	utils.Log("fetching certificate")
+	goclitools.Log("fetching certificate")
 	loadCertCmd := fmt.Sprintf(`cat /root/.acme.sh/%s/fullchain.cer /root/.acme.sh/%s/%s.key`, cert.Domain, cert.Domain, cert.Domain)
 	if data, err := c.ServiceExecInGrid(grid, serviceName, loadCertCmd); err == nil {
 		c.DeployCertificate(cert, string(data))
@@ -95,7 +94,7 @@ func (c *Client) removeAcmeServiceFromGrid(grid string) error {
 	if err := c.GridUse(grid); err != nil {
 		return err
 	}
-	utils.Log("removing acme-challenge service")
+	goclitools.Log("removing acme-challenge service")
 	return c.ServiceRemove("acme-challenge")
 }
 

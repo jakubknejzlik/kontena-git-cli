@@ -3,6 +3,7 @@ package kontena
 import (
 	"fmt"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
 
@@ -20,7 +21,7 @@ func (c *Client) CurrentMaster() Master {
 	}
 
 	var m Master
-	res, err := utils.Run("kontena master current")
+	res, err := goclitools.Run("kontena master current")
 	if err != nil {
 		return m
 	}
@@ -50,5 +51,5 @@ func (c *Client) EnsureMasterLogin() error {
 
 // MasterLogin ...
 func (c *Client) MasterLogin(masterURL, token string) error {
-	return utils.RunInteractive(fmt.Sprintf("kontena master login --skip-grid-auto-select --token %s %s", token, masterURL))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena master login --skip-grid-auto-select --token %s %s", token, masterURL))
 }

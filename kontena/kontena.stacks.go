@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
@@ -11,7 +12,7 @@ import (
 // StackList ...
 func (c *Client) StackList() ([]string, error) {
 	var list []string
-	res, err := utils.Run("kontena stack ls -q")
+	res, err := goclitools.Run("kontena stack ls -q")
 
 	if err != nil {
 		return list, err
@@ -23,7 +24,7 @@ func (c *Client) StackList() ([]string, error) {
 // StackListInGrid ...
 func (c *Client) StackListInGrid(grid string) ([]string, error) {
 	var list []string
-	res, err := utils.Run(fmt.Sprintf("kontena stack ls --grid %s -q", grid))
+	res, err := goclitools.Run(fmt.Sprintf("kontena stack ls --grid %s -q", grid))
 
 	if err != nil {
 		return list, err
@@ -82,12 +83,12 @@ func (c *Client) StackInstallOrUpgradeInGrid(grid string, stack model.KontenaSta
 
 // StackDeploy ...
 func (c *Client) StackDeploy(name string) error {
-	return utils.RunInteractive(fmt.Sprintf("kontena stack deploy %s", name))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena stack deploy %s", name))
 }
 
 // StackDeployInGrid ...
 func (c *Client) StackDeployInGrid(grid, name string) error {
-	return utils.RunInteractive(fmt.Sprintf("kontena stack deploy --grid %s %s", grid, name))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena stack deploy --grid %s %s", grid, name))
 }
 
 // StackInstall ...
@@ -112,12 +113,12 @@ func (c *Client) StackUpgradeInGrid(grid string, stack model.KontenaStack) error
 
 // StackRemove ...
 func (c *Client) StackRemove(name string) error {
-	return utils.RunInteractive(fmt.Sprintf("kontena stack remove --force %s", name))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena stack remove --force %s", name))
 }
 
 // StackRemoveFromGrid ...
 func (c *Client) StackRemoveFromGrid(grid, name string) error {
-	return utils.RunInteractive(fmt.Sprintf("kontena stack remove --grid %s --force %s", grid, name))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena stack remove --grid %s --force %s", grid, name))
 }
 
 func (c *Client) stackAction(action, name string, stack model.KontenaStack) error {
@@ -132,7 +133,7 @@ func (c *Client) stackAction(action, name string, stack model.KontenaStack) erro
 	if action == "install" {
 		cmd = fmt.Sprintf("kontena stack install --name %s %s", name, dsPath)
 	}
-	return utils.RunInteractive(cmd)
+	return goclitools.RunInteractive(cmd)
 }
 
 func (c *Client) stackActionInGrid(grid, action, name string, stack model.KontenaStack) error {
@@ -147,5 +148,5 @@ func (c *Client) stackActionInGrid(grid, action, name string, stack model.Konten
 	if action == "install" {
 		cmd = fmt.Sprintf("kontena stack install --grid %s --name %s %s", grid, name, dsPath)
 	}
-	return utils.RunInteractive(cmd)
+	return goclitools.RunInteractive(cmd)
 }

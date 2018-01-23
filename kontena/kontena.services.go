@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
@@ -42,20 +43,20 @@ func (c *Client) ServiceCreateInGrid(grid, name string, service model.KontenaSer
 	cmd = append(cmd, name)
 	cmd = append(cmd, service.Image)
 
-	utils.Log("creating service", name, "in grid", grid)
-	return utils.RunInteractive(strings.Join(cmd, " "))
+	goclitools.Log("creating service", name, "in grid", grid)
+	return goclitools.RunInteractive(strings.Join(cmd, " "))
 }
 
 // ServiceDeploy ...
 func (c *Client) ServiceDeploy(service string) error {
-	utils.Log("deploying service", service)
-	return utils.RunInteractive(fmt.Sprintf("kontena service deploy %s", service))
+	goclitools.Log("deploying service", service)
+	return goclitools.RunInteractive(fmt.Sprintf("kontena service deploy %s", service))
 }
 
 // ServiceDeployInGrid ...
 func (c *Client) ServiceDeployInGrid(grid, service string) error {
-	utils.Log("deploying service", service, "in grid", grid)
-	return utils.RunInteractive(fmt.Sprintf("kontena service deploy --grid %s %s", grid, service))
+	goclitools.Log("deploying service", service, "in grid", grid)
+	return goclitools.RunInteractive(fmt.Sprintf("kontena service deploy --grid %s %s", grid, service))
 }
 
 // ServiceInStackDeploy ...
@@ -70,12 +71,12 @@ func (c *Client) ServiceInStackInGridDeploy(grid, stack, service string) error {
 
 // ServiceExec ...
 func (c *Client) ServiceExec(service, command string) ([]byte, error) {
-	return utils.Run(fmt.Sprintf("kontena service exec %s %s", service, command))
+	return goclitools.Run(fmt.Sprintf("kontena service exec %s %s", service, command))
 }
 
 // ServiceExecInGrid ...
 func (c *Client) ServiceExecInGrid(grid, service, command string) ([]byte, error) {
-	return utils.Run(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
+	return goclitools.Run(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
 }
 
 // ServiceExecCommand ...
@@ -85,7 +86,10 @@ func (c *Client) ServiceExecCommand(service, command string) *exec.Cmd {
 
 // ServiceExecInGridCommand ...
 func (c *Client) ServiceExecInGridCommand(grid, service, command string) *exec.Cmd {
-	return utils.RunCommand(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
+	// this should be the final version
+	// return utils.RunCommand(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
+	// but after this bug is fixed: https://github.com/kontena/kontena/issues/2721
+	return utils.RunCommand(fmt.Sprintf("kontena grid use %s && kontena service exec %s %s", grid, service, command))
 }
 
 // ServiceInStackExec ...
@@ -110,13 +114,13 @@ func (c *Client) ServiceInStackInGridExecCommand(grid, stack, service, command s
 
 // ServiceRemove ...
 func (c *Client) ServiceRemove(service string) error {
-	utils.Log("removing service", service)
-	return utils.RunInteractive(fmt.Sprintf("kontena service rm --force %s", service))
+	goclitools.Log("removing service", service)
+	return goclitools.RunInteractive(fmt.Sprintf("kontena service rm --force %s", service))
 }
 
 // ServiceList ...
 func (c *Client) ServiceList() ([]string, error) {
-	data, err := utils.Run("kontena service ls -q")
+	data, err := goclitools.Run("kontena service ls -q")
 	if err != nil {
 		return []string{}, err
 	}
@@ -125,7 +129,7 @@ func (c *Client) ServiceList() ([]string, error) {
 
 // ServiceListInGrid ...
 func (c *Client) ServiceListInGrid(grid string) ([]string, error) {
-	data, err := utils.Run(fmt.Sprintf("kontena service ls --grid %s -q", grid))
+	data, err := goclitools.Run(fmt.Sprintf("kontena service ls --grid %s -q", grid))
 	if err != nil {
 		return []string{}, err
 	}
@@ -152,18 +156,18 @@ func (c *Client) ServiceExistsInGrid(grid, stack, service string) (bool, error) 
 
 // ServiceLogs ...
 func (c *Client) ServiceLogs(service string) (string, error) {
-	data, err := utils.Run(fmt.Sprintf("kontena service logs %s", service))
+	data, err := goclitools.Run(fmt.Sprintf("kontena service logs %s", service))
 	return string(data), err
 }
 
 // ServiceInStackLogs ...
 func (c *Client) ServiceInStackLogs(stack, service string) (string, error) {
-	data, err := utils.Run(fmt.Sprintf("kontena service logs %s/%s", stack, service))
+	data, err := goclitools.Run(fmt.Sprintf("kontena service logs %s/%s", stack, service))
 	return string(data), err
 }
 
 // ServiceInStackInGridLogs ...
 func (c *Client) ServiceInStackInGridLogs(grid, stack, service string) (string, error) {
-	data, err := utils.Run(fmt.Sprintf("kontena service logs --grid %s %s/%s", grid, stack, service))
+	data, err := goclitools.Run(fmt.Sprintf("kontena service logs --grid %s %s/%s", grid, stack, service))
 	return string(data), err
 }

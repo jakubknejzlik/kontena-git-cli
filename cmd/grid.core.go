@@ -3,8 +3,7 @@ package cmd
 import (
 	"strings"
 
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
-
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/urfave/cli"
@@ -14,7 +13,7 @@ func installCoreCommand() cli.Command {
 	return cli.Command{
 		Name: "core",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Core")
+			goclitools.LogSection("Core")
 			client := kontena.Client{}
 
 			dc, err := model.KontenaLoad("kontena.yml")

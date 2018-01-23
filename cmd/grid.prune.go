@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
-
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 
 	"github.com/urfave/cli"
@@ -15,7 +14,7 @@ func pruneStacksCommand() cli.Command {
 	return cli.Command{
 		Name: "prune",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Prune")
+			goclitools.LogSection("Prune")
 			client := kontena.Client{}
 
 			stacks, err := client.StackList()

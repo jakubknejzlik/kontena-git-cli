@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
@@ -12,7 +13,7 @@ func installRegistriesCommand() cli.Command {
 	return cli.Command{
 		Name: "registries",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Registries")
+			goclitools.LogSection("Registries")
 			client := kontena.Client{}
 
 			currentRegistries, listErr := client.RegistryList()

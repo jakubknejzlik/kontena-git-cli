@@ -3,9 +3,9 @@ package cmd
 import (
 	"time"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
 	"github.com/urfave/cli"
 )
@@ -24,7 +24,7 @@ func installCertificatesCommand() cli.Command {
 	return cli.Command{
 		Name: "install",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Install certificates")
+			goclitools.LogSection("Install certificates")
 			client := kontena.Client{}
 
 			currentCertificateSecretsMap := map[string]bool{}
@@ -41,7 +41,7 @@ func installCertificatesCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			utils.Log("registered certificates:", len(currentCertificateSecrets), ", local certificates:", len(certificates))
+			goclitools.Log("registered certificates:", len(currentCertificateSecrets), ", local certificates:", len(certificates))
 
 			for _, certificate := range certificates {
 				if currentCertificateSecretsMap[certificate.SecretName()] == false {
@@ -60,7 +60,7 @@ func clearExpiredCertificatesCommand() cli.Command {
 	return cli.Command{
 		Name: "clear",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Clear expired certificates")
+			goclitools.LogSection("Clear expired certificates")
 			client := kontena.Client{}
 
 			currentCertificateSecretsMap := map[string]bool{}
@@ -81,7 +81,7 @@ func clearExpiredCertificatesCommand() cli.Command {
 			for _, secret := range secrets {
 				if secret.IsCertificate() {
 					if !secret.CreatedAt.Before(date) {
-						utils.Log("removing certificate ", secret.Name, "; created:", secret.CreatedAt)
+						goclitools.Log("removing certificate ", secret.Name, "; created:", secret.CreatedAt)
 						if err := client.SecretRemove(secret.Name); err != nil {
 							return cli.NewExitError(err, 1)
 						}
@@ -89,7 +89,7 @@ func clearExpiredCertificatesCommand() cli.Command {
 				}
 			}
 
-			utils.Log("all expiring certificates cleared")
+			goclitools.Log("all expiring certificates cleared")
 
 			return nil
 		},

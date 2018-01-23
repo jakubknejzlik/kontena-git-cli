@@ -4,8 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
-
+	"github.com/inloop/goclitools"
 	yaml2 "gopkg.in/yaml.v2"
 )
 
@@ -145,7 +144,7 @@ func (c KontenaStack) ExportTemporary(translateSecrets bool) (string, error) {
 		return path, marshalError
 	}
 
-	utils.LogSection("exported kontena file", string(data))
+	goclitools.LogSection("exported kontena file", string(data))
 	if err := ioutil.WriteFile(path, data, 0644); err != nil {
 		return path, err
 	}

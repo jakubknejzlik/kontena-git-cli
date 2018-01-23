@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/inloop/goclitools"
 	"github.com/urfave/cli"
-
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
 )
 
 // Grid ...
@@ -19,13 +18,13 @@ func (c *Client) GridUse(grid string) error {
 	if grid == "" {
 		return cli.NewExitError("grid must be specified", 1)
 	}
-	return utils.RunInteractive(fmt.Sprintf("kontena grid use %s", grid))
+	return goclitools.RunInteractive(fmt.Sprintf("kontena grid use %s", grid))
 }
 
 // CurrentGrid ...
 func (c *Client) CurrentGrid() Grid {
 	var g Grid
-	res, err := utils.Run("kontena grid current --name")
+	res, err := goclitools.Run("kontena grid current --name")
 	if err != nil {
 		return g
 	}

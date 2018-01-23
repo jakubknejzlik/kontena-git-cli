@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
-	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
 	"github.com/urfave/cli"
 )
@@ -157,7 +157,7 @@ func installOrUpgradeStacksCommand() cli.Command {
 	return cli.Command{
 		Name: "stacks",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Installing/upgrading stacks")
+			goclitools.LogSection("Installing/upgrading stacks")
 			client := kontena.Client{}
 
 			stacks, _ := ioutil.ReadDir("./stacks")
@@ -167,7 +167,7 @@ func installOrUpgradeStacksCommand() cli.Command {
 					return cli.NewExitError(err, 1)
 				}
 				if !client.StackExists(stackName) {
-					utils.Log("installing stack", stackName)
+					goclitools.Log("installing stack", stackName)
 					dc, stackErr := getStackFromGrid(stackName)
 					if stackErr != nil {
 						dc = getDefaultStack(stackName)
@@ -178,7 +178,7 @@ func installOrUpgradeStacksCommand() cli.Command {
 					}
 				} else {
 					if stack, err := getStackFromGrid(stackName); err == nil {
-						utils.Log("upgrading stack", stackName)
+						goclitools.Log("upgrading stack", stackName)
 						if err := client.StackUpgrade(stack); err != nil {
 							return cli.NewExitError(err, 1)
 						}
@@ -195,14 +195,14 @@ func deployStacksCommand() cli.Command {
 	return cli.Command{
 		Name: "stacks",
 		Action: func(c *cli.Context) error {
-			utils.LogSection("Deploying stacks")
+			goclitools.LogSection("Deploying stacks")
 			client := kontena.Client{}
 
 			stacks, _ := ioutil.ReadDir("./stacks")
 			for _, stack := range stacks {
 				stackName := stack.Name()
 
-				utils.Log("deploying stack", stackName)
+				goclitools.Log("deploying stack", stackName)
 				if err := client.StackDeploy(stackName); err != nil {
 					return cli.NewExitError(err, 1)
 				}
