@@ -77,10 +77,10 @@ func clearExpiredCertificatesCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			date := time.Now().AddDate(0, 0, 90-7)
+			date := time.Now().AddDate(0, 0, -80)
 			for _, secret := range secrets {
 				if secret.IsCertificate() {
-					if !secret.CreatedAt.Before(date) {
+					if secret.CreatedAt.Before(date) {
 						goclitools.Log("removing certificate ", secret.Name, "; created:", secret.CreatedAt)
 						if err := client.SecretRemove(secret.Name); err != nil {
 							return cli.NewExitError(err, 1)
