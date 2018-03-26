@@ -11,7 +11,7 @@ lint:
 
 build:
 	go get ./...
-	GOOS=linux GOARCH=amd64 go build -o bin/kontena-git-alpine
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/kontena-git-alpine
 	docker build -t $(GIT_TAG) .
 
 tag:
