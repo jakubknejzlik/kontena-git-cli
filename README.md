@@ -19,6 +19,7 @@ This script communicates with kontena master. Ensure, that you have following en
 
 * `KONTENA_MASTER_URL` - api url of kontena master
 * `KONTENA_TOKEN` - kontena master token (see `kontena master token create/current`)
+* `KONTENA_CLEAR_CERTIFICATES_OFFSET` - number of days after certificates get regenerated (default: `70` - 20 days before expiration)
 
 # Grid repository
 

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/inloop/goclitools"
@@ -77,7 +79,16 @@ func clearExpiredCertificatesCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			date := time.Now().AddDate(0, 0, -80)
+			dayOffset := 70
+			offset := os.Getenv("KONTENA_CLEAR_CERTIFICATES_OFFSET")
+			if offset != "" {
+				i, err := strconv.Atoi(offset)
+				if err == nil {
+					dayOffset = i
+				}
+			}
+
+			date := time.Now().AddDate(0, 0, -dayOffset)
 			for _, secret := range secrets {
 				if secret.IsCertificate() {
 					if secret.CreatedAt.Before(date) {
