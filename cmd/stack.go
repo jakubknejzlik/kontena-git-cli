@@ -35,6 +35,13 @@ func StackCommand() cli.Command {
 func stackInstallCommand() cli.Command {
 	return cli.Command{
 		Name: "install",
+		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:   "force",
+				EnvVar: "KONTENA_FORCE_INSTALL",
+				Usage:  "Force stack installation if it doesn't exists in grid",
+			},
+		},
 		Action: func(c *cli.Context) error {
 			client := kontena.Client{}
 
@@ -53,6 +60,14 @@ func stackInstallCommand() cli.Command {
 			stack, stackErr := getStack(filename)
 			if stackErr != nil {
 				return cli.NewExitError(stackErr.Error(), 1)
+			}
+
+			if c.Bool("force") {
+				if !client.StackExists(stack.Name) {
+					if err := client.StackInstall(stack); err != nil {
+						return cli.NewExitError(err, 1)
+					}
+				}
 			}
 
 			if err := client.StackUpgrade(stack); err != nil {
