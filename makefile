@@ -1,5 +1,6 @@
 OWNER=jakubknejzlik
 IMAGE_NAME=kontena-git-cli
+BINARY_NAME=kontena-git
 QNAME=$(OWNER)/$(IMAGE_NAME)
 
 GIT_TAG=$(QNAME):$(TRAVIS_COMMIT)
@@ -11,7 +12,7 @@ lint:
 
 build:
 	go get ./...
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/kontena-git-alpine
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/binary-alpine
 	docker build -t $(GIT_TAG) .
 
 tag:
@@ -28,8 +29,8 @@ push: login
 
 build-local:
 	go get ./...
-	go build -o kontena-git
+	go build -o $(BINARY_NAME)
 
 deploy-local:
 	make build-local
-	mv kontena-git /usr/local/bin/
+	mv $(BINARY_NAME) /usr/local/bin/
