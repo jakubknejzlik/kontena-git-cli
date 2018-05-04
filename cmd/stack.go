@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
@@ -28,6 +29,7 @@ func StackCommand() cli.Command {
 		},
 		Subcommands: []cli.Command{
 			stackInstallCommand(),
+			stackRemoveCommand(),
 		},
 	}
 }
@@ -75,6 +77,38 @@ func stackInstallCommand() cli.Command {
 			}
 
 			if err := client.StackDeploy(stack.Name); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			return nil
+		},
+	}
+}
+
+func stackRemoveCommand() cli.Command {
+	return cli.Command{
+		Name: "rm",
+		Action: func(c *cli.Context) error {
+			client := kontena.Client{}
+
+			if err := client.EnsureMasterLogin(); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			grid := c.Parent().String("grid")
+			if client.CurrentGrid().Name == "" || grid != "" {
+				if err := client.GridUse(grid); err != nil {
+					return cli.NewExitError(err, 1)
+				}
+			}
+
+			stack := c.Args().First()
+
+			if stack == "" {
+				return cli.NewExitError(fmt.Errorf("provide stack attribute name"), 1)
+			}
+
+			if err := client.StackRemove(stack); err != nil {
 				return cli.NewExitError(err, 1)
 			}
 
