@@ -1,4 +1,4 @@
-FROM kontena/cli
+FROM kontena/cli:1.5.2
 
 COPY bin/binary-alpine /usr/local/bin/kontena-git
 
