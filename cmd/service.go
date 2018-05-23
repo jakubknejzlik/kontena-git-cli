@@ -51,7 +51,11 @@ func stackRunCommand() cli.Command {
 
 			serviceName := strings.Split(args.First(), "/")
 
-			return runCommandInStack(grid, serviceName[0], serviceName[1], cmd)
+			if err := runCommandInStack(grid, serviceName[0], serviceName[1], cmd); err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			return nil
 		},
 	}
 }
