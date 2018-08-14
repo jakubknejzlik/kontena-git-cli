@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
@@ -156,13 +155,45 @@ func installOrUpgradeStacksCommand() cli.Command {
 			goclitools.LogSection("Installing/upgrading stacks")
 			client := kontena.Client{}
 
+			goclitools.Log("Updating secrets...")
+
+			currentSecrets, err := client.SecretList()
+			if err != nil {
+				return cli.NewExitError(err, 1)
+			}
+
+			secretsImports := map[string]string{}
+
 			stacks, _ := ioutil.ReadDir("./stacks")
 			for _, stack := range stacks {
 				stackName := stack.Name()
-				if err := client.SecretsImport(stackName, fmt.Sprintf("./stacks/%s/secrets.yml", stackName)); err != nil {
+				secretsImport, err := client.CreateSecretsImport(stackName, fmt.Sprintf("./stacks/%s/secrets.yml", stackName), currentSecrets)
+				if err != nil {
 					return cli.NewExitError(err, 1)
 				}
-				if !client.StackExists(stackName) {
+
+				for key, value := range secretsImport {
+					secretsImports[key] = value
+				}
+			}
+
+			client.SecretsImportInGrid(secretsImports)
+
+			goclitools.Log("Secrets updated")
+
+			currentStacks, err := client.StackList()
+			if err != nil {
+				return cli.NewExitError(err, 1)
+			}
+			currentStacksMap := map[string]bool{}
+			for _, stackName := range currentStacks {
+				currentStacksMap[stackName] = true
+			}
+
+			for _, stack := range stacks {
+				stackName := stack.Name()
+
+				if !currentStacksMap[stackName] {
 					goclitools.Log("installing stack", stackName)
 					dc, stackErr := getStackFromGrid(stackName)
 					if stackErr != nil {
@@ -180,8 +211,8 @@ func installOrUpgradeStacksCommand() cli.Command {
 						}
 					}
 				}
-				time.Sleep(time.Second * 1)
 			}
+
 			return nil
 		},
 	}

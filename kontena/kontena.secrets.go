@@ -11,49 +11,37 @@ import (
 	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
-	"github.com/urfave/cli"
 )
 
-// SecretsImport ...
-func (c *Client) SecretsImport(stack, path string) error {
-	var secrets map[string]string
+// CreateSecretsImport ...
+func (c *Client) CreateSecretsImport(stack, path string, currentSecrets []model.Secret) (map[string]string, error) {
+	result := map[string]string{}
 
+	var secrets map[string]string
 	data, err := ioutil.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
-		return cli.NewExitError(err, 1)
+		return result, err
 	}
 
 	yaml.Unmarshal(data, &secrets)
 
-	oldSecrets, err := c.SecretList()
-	if err != nil {
-		return err
-	}
-	oldSecretNames := []string{}
-	for _, secret := range oldSecrets {
-		oldSecretNames = append(oldSecretNames, secret.Name)
-	}
-	for _, secret := range oldSecrets {
+	secretsToRemove := []string{}
+
+	for _, secret := range currentSecrets {
 		secretKey := strings.Replace(secret.Name, stack+"_", "", 1)
 		if strings.HasPrefix(secret.Name, stack+"_") && secrets[secretKey] == "" {
-			goclitools.Log("removing secret", strings.Replace(secret.Name, stack+"_", stack+":", 1))
-			c.SecretRemove(secret.Name)
+			secretsToRemove = append(secretsToRemove, secret.Name)
 		}
 	}
 
+	for _, key := range secretsToRemove {
+		result[key] = ""
+	}
 	for key, value := range secrets {
-		secretKey := fmt.Sprintf("%s_%s", stack, key)
-		if utils.ArrayOfStringsContains(oldSecretNames, secretKey) {
-			goclitools.Log("updating secret", stack+":"+key)
-		} else {
-			goclitools.Log("adding secret", stack+":"+key)
-		}
-		if err := c.SecretWrite(secretKey, value); err != nil {
-			return err
-		}
+		result[stack+"_"+key] = value
 	}
 
-	return nil
+	return result, nil
 }
 
 // SecretExists ...
@@ -122,4 +110,15 @@ func (c *Client) SecretValue(name string) (string, error) {
 func (c *Client) SecretValueInGrid(grid, name string) (string, error) {
 	value, err := goclitools.Run(fmt.Sprintf("kontena vault read --grid %s --value %s", grid, name))
 	return string(value), err
+}
+
+// SecretsImportInGrid ...
+func (c *Client) SecretsImportInGrid(secrets map[string]string) error {
+	secretsInput, err := yaml.Marshal(secrets)
+	if err != nil {
+		return err
+	}
+	cmd := fmt.Sprintf("kontena vault import --force --empty-is-null")
+	_, err = goclitools.RunWithInput(cmd, secretsInput)
+	return err
 }
