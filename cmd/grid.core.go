@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
@@ -26,18 +24,18 @@ func installCoreCommand() cli.Command {
 			}
 
 			loadBalancer := dc.Services["internet_lb"]
-			currentCertificates, certsErr := client.CurrentCertificateSecrets()
+			currentCertificates, certsErr := model.CertificateLoadLocals()
 			if certsErr != nil {
 				return cli.NewExitError(certsErr, 1)
 			}
 
-			for _, secret := range currentCertificates {
-				s := model.KontenaSecret{
-					Secret: strings.Replace(secret.Name, "core_", "", 1),
-					Name:   "SSL_CERTS",
-					Type:   "env",
+			for _, cert := range currentCertificates {
+				s := model.KontenaCertificate{
+					Subject: cert.Domain,
+					Name:    "SSL_CERT_" + cert.Domain,
+					Type:    "env",
 				}
-				loadBalancer.Secrets = append(loadBalancer.Secrets, s)
+				loadBalancer.Certificates = append(loadBalancer.Certificates, s)
 			}
 			dc.Services["internet_lb"] = loadBalancer
 

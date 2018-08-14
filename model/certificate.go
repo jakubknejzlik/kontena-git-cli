@@ -1,9 +1,11 @@
 package model
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 	"regexp"
+	"strings"
 
 	"github.com/jakubknejzlik/kontena-git-cli/utils"
 
@@ -12,9 +14,10 @@ import (
 
 // Certificate ...
 type Certificate struct {
-	Domain      string `yaml:"domain,omitempty"`
-	Bundle      string `yaml:"bundle,omitempty"`
-	LetsEncrypt bool   `yaml:"letsencrypt,omitempty"`
+	Domain           string   `yaml:"domain,omitempty"`
+	Bundle           string   `yaml:"bundle,omitempty"`
+	Type             string   `yaml:"type,omitempty"`
+	AlternativeNames []string `yaml:"alternative_names,omitempty"`
 }
 
 // CertificateLoadLocals ...
@@ -53,6 +56,11 @@ func CertificateLoadLocals() (map[string]Certificate, error) {
 	return certs, nil
 }
 
+// AllDomains ...
+func (c Certificate) AllDomains() []string {
+	return append([]string{c.Domain}, c.AlternativeNames...)
+}
+
 // SecretName ...
 func (c Certificate) SecretName() string {
 	rg := regexp.MustCompile(`[^a-zA-Z0-9_]`)
@@ -61,8 +69,7 @@ func (c Certificate) SecretName() string {
 	return "core_SSL_CERTIFICATE_" + name + "_BUNDLE"
 }
 
-// IsCertificateName ...
-func IsCertificateName(name string) bool {
-	re := regexp.MustCompile(`core_SSL_CERTIFICATE_[a-zA-Z0-9_]+_BUNDLE`)
-	return re.Match([]byte(name))
+// Description ...
+func (c Certificate) Description() string {
+	return fmt.Sprintf("%s (%s)", c.Domain, strings.Join(c.AlternativeNames, ", "))
 }

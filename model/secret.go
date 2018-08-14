@@ -12,11 +12,6 @@ type Secret struct {
 	UpdatedAt time.Time
 }
 
-// IsCertificate ...
-func (s *Secret) IsCertificate() bool {
-	return IsCertificateName(s.Name)
-}
-
 // SecretParseList ...
 func SecretParseList(rows []string) ([]Secret, error) {
 	valueRE := regexp.MustCompile("[^\\s]+\\s+([^\\s]+)")

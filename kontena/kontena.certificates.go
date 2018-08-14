@@ -2,10 +2,11 @@ package kontena
 
 import (
 	"fmt"
-	"log"
+	"strings"
 
 	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
+	"github.com/jakubknejzlik/kontena-git-cli/utils"
 	"github.com/urfave/cli"
 )
 
@@ -16,22 +17,16 @@ func (c *Client) CertificateInstall(cert model.Certificate) error {
 
 // CertificateInstallInGrid ...
 func (c *Client) CertificateInstallInGrid(grid string, cert model.Certificate) error {
-	goclitools.Log("installing certificate", cert.Domain, "in grid", grid)
+	goclitools.Log("installing certificate", cert.Description(), "in grid", grid)
 	if cert.Bundle != "" {
 		return c.DeployCertificateInGrid(grid, cert, cert.Bundle)
 	}
 
-	if cert.Bundle == "" && cert.LetsEncrypt {
+	if cert.Bundle == "" {
 		return c.issueLECertificateInGrid(grid, cert)
 	}
 
 	return cli.NewExitError(fmt.Sprintf(`certificate %s is not marked as letsencrypt and doesn't contain bundle`, cert.Domain), 1)
-}
-
-// DeployCertificate ...
-func (c *Client) DeployCertificate(cert model.Certificate, bundle string) error {
-	goclitools.Log("writing certificate", cert.SecretName())
-	return c.SecretWrite(cert.SecretName(), bundle)
 }
 
 // DeployCertificateInGrid ...
@@ -41,95 +36,38 @@ func (c *Client) DeployCertificateInGrid(grid string, cert model.Certificate, bu
 }
 
 func (c *Client) issueLECertificateInGrid(grid string, cert model.Certificate) error {
-	service := model.KontenaService{
-		Environment: []string{
-			"KONTENA_LB_VIRTUAL_HOSTS=" + cert.Domain,
-			"KONTENA_LB_VIRTUAL_PATH=/.well-known/acme-challenge",
-		},
-		Links: []string{
-			"core/internet_lb",
-		},
-		Image: "jakubknejzlik/acme.sh-nginx",
-	}
-	serviceName := "acme-challenge"
+	allDomains := cert.AllDomains()
 
-	if err := c.removeAcmeServiceFromGrid(grid); err != nil {
-		return err
+	for _, domain := range allDomains {
+		if err := authorizeLetsEncryptDomain(domain, cert.Type, grid); err != nil {
+			return err
+		}
 	}
 
-	if err := c.ServiceCreateInGrid(grid, serviceName, service); err != nil {
-		return err
-	}
-
-	if err := c.ServiceDeployInGrid(grid, serviceName); err != nil {
-		return err
-	}
-
-	goclitools.Log("issuing certificate")
-	issueCmd := fmt.Sprintf(`/issue.sh %s`, cert.Domain)
-	if data, err := c.ServiceExecInGrid(grid, serviceName, issueCmd); err != nil {
-		log.Println(err, string(data))
-		// return err
-	}
-
-	goclitools.Log("fetching certificate")
-	loadCertCmd := fmt.Sprintf(`cat /root/.acme.sh/%s/fullchain.cer /root/.acme.sh/%s/%s.key`, cert.Domain, cert.Domain, cert.Domain)
-	if data, err := c.ServiceExecInGrid(grid, serviceName, loadCertCmd); err == nil {
-		c.DeployCertificate(cert, string(data))
-	} else {
-		return err
-	}
-
-	return c.removeAcmeServiceFromGrid(grid)
+	return requestLetsEncryptDomains(allDomains, grid)
 }
 
-func (c *Client) removeAcmeServiceFromGrid(grid string) error {
-	exists, err := c.ServiceExistsInGrid(grid, "", "acme-challenge")
+func authorizeLetsEncryptDomain(domain, authType, grid string) error {
+	if authType == "" {
+		authType = "http-01"
+	}
+	cmd := fmt.Sprintf("kontena certificate authorize --grid %s --type %s --linked-service core/internet_lb %s", grid, authType, domain)
+	return goclitools.RunInteractive(cmd)
+}
+
+func requestLetsEncryptDomains(domains []string, grid string) error {
+	cmd := fmt.Sprintf("kontena certificate request --grid %s %s", grid, strings.Join(domains, " "))
+	return goclitools.RunInteractive(cmd)
+}
+
+// CurrentCertificates ...
+func (c *Client) CurrentCertificates() ([]string, error) {
+	var certs = []string{}
+	cmd := fmt.Sprintf("kontena certificate ls -q")
+	res, err := goclitools.Run(cmd)
 	if err != nil {
-		return err
+		return certs, err
 	}
-	if exists == false {
-		return nil
-	}
-	if err := c.GridUse(grid); err != nil {
-		return err
-	}
-	goclitools.Log("removing acme-challenge service")
-	return c.ServiceRemove("acme-challenge")
-}
-
-// CurrentCertificateSecrets ...
-func (c *Client) CurrentCertificateSecrets() ([]model.Secret, error) {
-	certs := []model.Secret{}
-	secrets, secretsErr := c.SecretList()
-
-	if secretsErr != nil {
-		return certs, secretsErr
-	}
-
-	for _, secret := range secrets {
-		if secret.IsCertificate() {
-			certs = append(certs, secret)
-		}
-	}
-
-	return certs, nil
-}
-
-// CurrentCertificateSecretsInGrid ...
-func (c *Client) CurrentCertificateSecretsInGrid(grid string) ([]model.Secret, error) {
-	certs := []model.Secret{}
-	secrets, secretsErr := c.SecretListInGrid(grid)
-
-	if secretsErr != nil {
-		return certs, secretsErr
-	}
-
-	for _, secret := range secrets {
-		if secret.IsCertificate() {
-			certs = append(certs, secret)
-		}
-	}
-
+	certs = utils.SplitString(string(res), "\n")
 	return certs, nil
 }

@@ -140,10 +140,6 @@ func gridCleanupCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := clearExpiredCertificatesCommand().Run(c); err != nil {
-				return cli.NewExitError(err, 1)
-			}
-
 			if err := installCertificatesCommand().Run(c); err != nil {
 				return cli.NewExitError(err, 1)
 			}

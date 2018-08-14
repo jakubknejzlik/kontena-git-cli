@@ -24,6 +24,13 @@ type KontenaSecret struct {
 	Type   string `yaml:"type,omitempty"`
 }
 
+// KontenaCertificate ...
+type KontenaCertificate struct {
+	Subject string `yaml:"subject,omitempty"`
+	Name    string `yaml:"name,omitempty"`
+	Type    string `yaml:"type,omitempty"`
+}
+
 // KontenaService ...
 type KontenaService struct {
 	Image           string                        `yaml:"image,omitempty"`
@@ -49,6 +56,7 @@ type KontenaService struct {
 	Privileged      bool                          `yaml:"privileged,omitempty"`
 	User            string                        `yaml:"user,omitempty"`
 	Secrets         []KontenaSecret               `yaml:"secrets"`
+	Certificates    []KontenaCertificate          `yaml:"certificates"`
 	Hooks           map[string]KontenaServiceHook `yaml:"hooks"`
 	Extends         KontenaServiceExtends         `yaml:"extends,omitempty"`
 	Deploy          KontenaServiceDeploy          `yaml:"deploy,omitempty"`
