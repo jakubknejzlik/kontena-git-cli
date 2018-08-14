@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/inloop/goclitools"
 	"github.com/jakubknejzlik/kontena-git-cli/kontena"
 	"github.com/jakubknejzlik/kontena-git-cli/model"
@@ -44,7 +42,6 @@ func installCertificatesCommand() cli.Command {
 
 			for _, certificate := range certificates {
 				if currentCertificatesMap[certificate.Domain] == false {
-					fmt.Println("test!!!", certificate.Domain)
 					if err := client.CertificateInstall(certificate); err != nil {
 						return cli.NewExitError(err, 1)
 					}
