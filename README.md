@@ -10,16 +10,16 @@ This cli tool helps to organize kontena stacks using git, so you can have all co
 
 As it's not recommended to store secrets with project sources this cli assumes you have at least two repositories:
 
-* `grid repository` - store list of stacks, registries, certificates and core configuration (see below)
-* `project repository(ies)` - project sources and deployment configuration
+- `grid repository` - store list of stacks, registries, certificates and core configuration (see below)
+- `project repository(ies)` - project sources and deployment configuration
 
 ### Environment variables
 
 This script communicates with kontena master. Ensure, that you have following environment variables correctly set:
 
-* `KONTENA_MASTER_URL` - api url of kontena master
-* `KONTENA_TOKEN` - kontena master token (see `kontena master token create/current`)
-* `KONTENA_CLEAR_CERTIFICATES_OFFSET` - number of days after certificates get regenerated (default: `70` - 20 days before expiration)
+- `KONTENA_MASTER_URL` - api url of kontena master
+- `KONTENA_TOKEN` - kontena master token (see `kontena master token create/current`)
+- `KONTENA_CLEAR_CERTIFICATES_OFFSET` - number of days after certificates get regenerated (default: `70` - 20 days before expiration)
 
 # Grid repository
 
@@ -44,12 +44,18 @@ Structure of this repository should be:
 ### Certificates format:
 
 ```
-www.example.com:
-  letsencrypt: true
-blah.example.com:
-  letsencrypt: true
+www.example.com: #subject name
+  alternative_names:
+    - test.example.com
+    - test2.example.com
+
+doe.com:
+  alternative_names:
+    - john.doe.com
 ...
 ```
+
+_NOTE: If you want to add alternative name/s to already existing certificate, use it as subject name and previous subject move to alternative_names. This will trigger the update (the yaml key has to change as it's used to verify if certificate already exists – for example if you want to create jane.doe.com, add it instead of doe.com and move doe.com to alternative_names)._
 
 ### Registry format:
 
