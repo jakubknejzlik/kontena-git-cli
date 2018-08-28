@@ -33,6 +33,10 @@ func gridInstallCommand() cli.Command {
 				Name:  "deploy",
 				Usage: "automatically deploy all services",
 			},
+			cli.BoolFlag{
+				Name:  "prune",
+				Usage: "automatically clear undefined services",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			client := kontena.Client{}
@@ -69,8 +73,10 @@ func gridInstallCommand() cli.Command {
 				return cli.NewExitError(err, 1)
 			}
 
-			if err := pruneStacksCommand().Run(c); err != nil {
-				return cli.NewExitError(err, 1)
+			if c.Bool("deploy") {
+				if err := pruneStacksCommand().Run(c); err != nil {
+					return cli.NewExitError(err, 1)
+				}
 			}
 
 			if err := installOrUpgradeStacksCommand().Run(c); err != nil {
