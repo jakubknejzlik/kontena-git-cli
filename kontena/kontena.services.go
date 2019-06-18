@@ -71,17 +71,17 @@ func (c *Client) ServiceInStackInGridDeploy(grid, stack, service string) error {
 
 // ServiceExec ...
 func (c *Client) ServiceExec(service, command string) ([]byte, error) {
-	return goclitools.Run(fmt.Sprintf("kontena service exec %s %s", service, command))
+	return goclitools.Run(fmt.Sprintf("kontena service exec %s -- %s", service, command))
 }
 
 // ServiceExecInGrid ...
 func (c *Client) ServiceExecInGrid(grid, service, command string) ([]byte, error) {
-	return goclitools.Run(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
+	return goclitools.Run(fmt.Sprintf("kontena service exec --grid %s %s -- %s", grid, service, command))
 }
 
 // ServiceExecCommand ...
 func (c *Client) ServiceExecCommand(service, command string) *exec.Cmd {
-	return utils.RunCommand(fmt.Sprintf("kontena service exec %s %s", service, command))
+	return utils.RunCommand(fmt.Sprintf("kontena service exec %s -- %s", service, command))
 }
 
 // ServiceExecInGridCommand ...
@@ -89,7 +89,7 @@ func (c *Client) ServiceExecInGridCommand(grid, service, command string) *exec.C
 	// this should be the final version
 	// return utils.RunCommand(fmt.Sprintf("kontena service exec --grid %s %s %s", grid, service, command))
 	// but after this bug is fixed: https://github.com/kontena/kontena/issues/2721
-	return utils.RunCommand(fmt.Sprintf("kontena grid use %s && kontena service exec %s %s", grid, service, command))
+	return utils.RunCommand(fmt.Sprintf("kontena grid use %s && kontena service exec %s -- %s", grid, service, command))
 }
 
 // ServiceInStackExec ...
